@@ -113,13 +113,23 @@ export const nowMinutes = () => { const d = new Date(); return d.getHours() * 60
 
 // ── Feedback ──────────────────────────────────────────────────────────────
 let toastTimer = null;
-export function toast(msg) {
+/** A short message at the top. `action` ({ label, run }) adds a button, e.g. Undo. */
+export function toast(msg, action) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = msg;
+  el.classList.toggle('has-act', !!action);
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'toast-act';
+    b.textContent = action.label;
+    b.addEventListener('click', () => { clearTimeout(toastTimer); el.classList.remove('show'); action.run(); }, { once: true });
+    el.append(' ', b);
+  }
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  toastTimer = setTimeout(() => el.classList.remove('show'), action ? 5000 : 2600);
 }
 
 export function vibrate(ms = 10) {

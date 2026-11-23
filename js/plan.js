@@ -2,8 +2,9 @@
 //   day   – one timeline of time blocks (an ideal day, a routine…)
 //   week  – Mon–Sun columns sharing one timeline; swipe sideways on phones
 //   month – a calendar with things planned on each date, month by month
-// Blocks can be tapped to edit, dragged to move (long-press on touch; across
-// days in a week) and stretched from the bottom handle. Stickers sit on a
+// Blocks can be tapped to edit, dragged to move (a deliberate hold on touch;
+// across days in a week) and stretched from the bottom handle (also a hold on
+// touch, so scrolling past a block never changes its time). Undo follows. Stickers sit on a
 // layer above the page (one sticker page per month for monthly schedules).
 
 import * as store from './store.js';
@@ -421,30 +422,45 @@ export function createPlan(root) {
   }
 
   // ── block gestures (daily & weekly) ───────────────────────────────────
+  // On a phone a block only moves (or stretches, from its bottom handle) after
+  // a deliberate hold: it sinks a little while you hold, then lifts with a buzz.
+  // A finger that moves before then is scrolling, and a quick tap opens it.
+  const HOLD_MS = 550;
   wrap.addEventListener('pointerdown', e => {
     if (!editable() || decor || !cur() || isMonth() || e.button > 0) return;
     const blk = e.target.closest('.blk');
-    if (e.target.closest('.blk-handle')) {
+    if (!blk) {
+      if (e.target.closest('.timeline') && !e.target.closest('.tl-gutter')) tapEmpty = { x: e.clientX, y: e.clientY };
+      return;
+    }
+    const mode = e.target.closest('.blk-handle') ? 'resize' : 'move';
+    const mouse = e.pointerType === 'mouse';
+    if (mouse && mode === 'resize') {
       e.preventDefault();
       startDrag('resize', blk.dataset.id, e.clientX, e.clientY);
       return;
     }
-    if (blk) {
-      press = { id: blk.dataset.id, x: e.clientX, y: e.clientY, pointerId: e.pointerId, mouse: e.pointerType === 'mouse', timer: null };
-      if (!press.mouse) press.timer = setTimeout(() => { if (press) startDrag('move', press.id, press.x, press.y); }, 320);
-      return;
+    press = { id: blk.dataset.id, mode, x: e.clientX, y: e.clientY, pointerId: e.pointerId, mouse, el: blk, timer: null, cue: null };
+    if (!mouse) {
+      press.cue = setTimeout(() => blk.classList.add('pressing'), 120);
+      press.timer = setTimeout(() => { if (press) startDrag(press.mode, press.id, press.x, press.y); }, HOLD_MS);
     }
-    if (e.target.closest('.timeline') && !e.target.closest('.tl-gutter')) tapEmpty = { x: e.clientX, y: e.clientY };
   });
 
-  function cancelPress() { if (press) clearTimeout(press.timer); press = null; }
+  function cancelPress() {
+    if (!press) return;
+    clearTimeout(press.timer);
+    clearTimeout(press.cue);
+    press.el.classList.remove('pressing');
+    press = null;
+  }
 
   window.addEventListener('pointermove', e => {
     if (drag) { drag.lastX = e.clientX; drag.lastY = e.clientY; applyDrag(); return; }
     if (press && e.pointerId === press.pointerId) {
       const d = Math.hypot(e.clientX - press.x, e.clientY - press.y);
       if (press.mouse && d > 4) startDrag('move', press.id, press.x, press.y);
-      else if (!press.mouse && d > 9) cancelPress();     // finger is scrolling
+      else if (!press.mouse && d > 10) cancelPress();    // finger is scrolling
     }
     if (tapEmpty && Math.hypot(e.clientX - tapEmpty.x, e.clientY - tapEmpty.y) > 9) tapEmpty = null;
   });
@@ -515,12 +531,25 @@ export function createPlan(root) {
 
   function endDrag() {
     cancelAnimationFrame(drag.raf);
-    const b = findBlock(drag.id);
-    const o = drag.orig;
+    const { id, mode, orig: o } = drag;
+    const b = findBlock(id);
     const changed = b && (b.start !== o.start || b.end !== o.end || b.day !== o.day);
     drag = null;
     root.classList.remove('dragging');
-    if (changed) save();
+    if (changed) {
+      save();
+      const when = `${isWeek() && b.day !== o.day ? dowName(b.day) + ' ' : ''}${fmtTime(b.start)} – ${fmtTime(b.end)}`;
+      toast(`${mode === 'resize' ? 'Now' : 'Moved to'} ${when}`, { label: 'Undo', run: () => {
+        const x = findBlock(id);
+        if (!x) return;
+        x.start = o.start;
+        x.end = o.end;
+        if (o.day !== undefined) x.day = o.day;
+        save();
+        renderBlocks();
+        vibrate(8);
+      } });
+    }
     renderBlocks();
   }
 

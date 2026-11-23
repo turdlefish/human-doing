@@ -81,7 +81,7 @@ function render() {
   el.innerHTML = `
     <div class="card-tape"></div>
     <h3 class="card-title">💭 App feedback</h3>
-    <p class="muted small fb-intro">Bugs, ideas and wishes for ${APP}. Either of you can add them, and tick them off once they're sorted.</p>
+    <p class="muted small fb-intro">Bugs, ideas and wishes for ${APP}. Either of you can add them, and tick them off once they're sorted. The person who makes ${APP} sees them too.</p>
     <form class="fb-add">
       <textarea class="inp" name="fb" rows="2" maxlength="${MAX}" placeholder="e.g. A way to snooze the walk nudges" aria-label="New feedback">${esc(drafts.add)}</textarea>
       <button type="submit" class="btn small">Add</button>

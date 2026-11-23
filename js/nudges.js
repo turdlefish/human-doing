@@ -71,6 +71,13 @@ export function versionNote() {
 }
 
 /** After an update: What's new, once, with a button to tell your person. Also puts your version in your profile. */
+// Versions with notes this phone hasn't shown yet, newest first.
+function unseenVersions(seen) {
+  return Object.keys(WHATS_NEW)
+    .filter(v => !newer(v, VERSION) && (!seen || newer(v, seen)))
+    .sort((a, b) => (newer(a, b) ? -1 : 1));
+}
+
 export function checkWhatsNew() {
   const p = store.readMine('profile', null);
   if (p && p.appV !== VERSION) store.writeMine('profile', { ...p, appV: VERSION });
@@ -78,11 +85,13 @@ export function checkWhatsNew() {
   lsSet(SEEN_V, VERSION);
   const s = store.getSession();
   const justJoined = s && s.joined && Date.now() - s.joined < 10 * 60e3;   // a new phone: nothing to announce
-  if (seen === VERSION || justJoined || !WHATS_NEW.length) return;
+  const vs = unseenVersions(seen);
+  if (seen === VERSION || justJoined || !vs.length) return;
+  const news = WHATS_NEW[VERSION] || WHATS_NEW[vs[0]];
   const t = them();
   const sheet = openSheet({
     title: `What's new in ${APP} ${VERSION} ✨`,
-    body: `<ul class="wn-list">${WHATS_NEW.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    body: `${vs.map((v, i) => `${i ? `<p class="muted small wn-also">And in ${esc(v)}:</p>` : ''}<ul class="wn-list">${WHATS_NEW[v].map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}
       <div class="sheet-actions">
         <button type="button" class="btn ghost" data-wn="close">Lovely</button>
         ${t ? `<button type="button" class="btn" data-wn="tell">🔔 Tell ${esc(t.name)}</button>` : ''}
@@ -92,7 +101,7 @@ export function checkWhatsNew() {
     const b = e.target.closest('[data-wn]');
     if (!b) return;
     if (b.dataset.wn === 'tell' && t) {
-      sendNudge('version', `${APP} ${VERSION} is here: ${WHATS_NEW.map(x => x.replace(/^\S+\s/, '').replace(/ \(.*\)$/, '')).join(' · ')}`, { v: VERSION });
+      sendNudge('version', `${APP} ${VERSION} is here: ${news.map(x => x.replace(/^\S+\s/, '').replace(/ \(.*\)$/, '')).join(' · ')}`, { v: VERSION });
       toast(`Told ${t.name} ✨`);
     }
     sheet.close();
