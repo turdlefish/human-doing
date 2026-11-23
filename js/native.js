@@ -36,11 +36,18 @@ export function nativeTheme(dark) {
 
 export function startNative() {
   if (!bridge) return;
-  const s = store.getSession();
   // Lets the home-screen widgets refresh from the database while the app is closed.
-  bridge.setSession(JSON.stringify({ url: CONFIG.supabaseUrl, key: CONFIG.supabaseKey, table: CONFIG.table, space: s.space, slot: s.slot }));
+  updateNativeSession();
 }
 
 export function stopNative() {
   if (bridge) bridge.setSession('');
+}
+
+
+/** Tells the Android app which space to check while it's closed (again after a move to a new code). */
+export function updateNativeSession() {
+  if (!bridge) return;
+  const s = store.getSession();
+  bridge.setSession(JSON.stringify({ url: CONFIG.supabaseUrl, key: CONFIG.supabaseKey, table: CONFIG.table, space: s.space, slot: s.slot }));
 }

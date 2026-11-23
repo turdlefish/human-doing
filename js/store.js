@@ -27,6 +27,7 @@
 //     only then, and come down only when they've changed.
 
 import { CONFIG, apiBase } from './config.js';
+import { makeLongCode } from './spacemove.js';
 
 const NS = 'doing';
 const HB_NS = 'tend';   // Human Being: read, never written
@@ -324,6 +325,37 @@ export function startSync() {
 export function stopSync() { clearInterval(pollTimer); pollTimer = null; }
 export const syncNow = () => flush().then(() => pull({ full: true }));
 
+/**
+ * Moves this phone to a new space code (see spacemove.js), keeping everything
+ * it has: each document, and any edits still waiting to be sent, only change
+ * their name (a copy is never dropped unless the new name holds one as new).
+ * Then syncs again with the new code.
+ */
+export function rekeySpace(to) {
+  const from = session.space;
+  if (!to || to === from) return Promise.resolve(true);
+  stopSync();
+  const swap = fk => { const m = /^([a-z]+):([^:]+):(.*)$/.exec(fk); return m && m[2] === from ? `${m[1]}:${to}:${m[3]}` : null; };
+  const keys = [];
+  try { for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i)); } catch (e) {}
+  for (const k of keys) {
+    if (!k || !k.startsWith(DOC_PREFIX)) continue;
+    const nk = swap(k.slice(DOC_PREFIX.length));
+    if (!nk) continue;
+    const e = lsGet(k), cur = lsGet(DOC(nk));
+    if (!e || (cur && (cur.t || 0) >= (e.t || 0)) || lsSet(DOC(nk), e)) lsDel(k);
+  }
+  dirty = new Set([...dirty].map(fk => swap(fk) || fk));
+  seen = {};
+  lsSet(DIRTY_KEY, [...dirty]);
+  lsSet(SEEN_KEY, seen);
+  cursor = {};
+  lastFull = 0;
+  lsSet(CURSOR_KEY, cursor);
+  setSession({ ...session, space: to });
+  return startSync();
+}
+
 // The Android app's widgets may have run a hidden copy of the app while this
 // one was out of sight (doing-android SyncJob): pick up what it sent and noted.
 function rereadBookkeeping() {
@@ -345,18 +377,8 @@ window.addEventListener('online', () => { if (session) { flush(); pull(); } });
 window.addEventListener('offline', () => setStatus('offline'));
 
 // ── Spaces ────────────────────────────────────────────────────────────────
-const ADJ = ['sunny', 'cozy', 'fuzzy', 'sweet', 'misty', 'dreamy', 'peachy', 'minty', 'sleepy', 'bubbly',
-  'snug', 'honey', 'velvet', 'starry', 'dewy', 'rosy', 'lucky', 'gentle', 'merry', 'breezy', 'cloudy',
-  'golden', 'lilac', 'silky', 'twinkly', 'jolly', 'mellow', 'plushy', 'sparkly', 'tender'];
-const NOUN = ['otter', 'bunny', 'panda', 'koala', 'fawn', 'duckling', 'kitten', 'puffin', 'hedgehog', 'lamb',
-  'robin', 'seal', 'cub', 'sparrow', 'bee', 'fox', 'mochi', 'dumpling', 'teacup', 'petal', 'clover',
-  'cloud', 'acorn', 'pebble', 'muffin', 'peach', 'plum', 'tulip', 'fern', 'moon'];
-
-export function makeSpaceCode() {
-  const r = new Uint32Array(3);
-  crypto.getRandomValues(r);
-  return `${ADJ[r[0] % ADJ.length]}-${NOUN[r[1] % NOUN.length]}-${1000 + (r[2] % 9000)}`;
-}
+// New spaces get a long code; older couples can move to one from Us (spacemove.js).
+export const makeSpaceCode = () => makeLongCode();
 export const normalizeCode = s => String(s || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
 // Who's already in a space? Returns { a?, b? } (Human Doing profiles) and

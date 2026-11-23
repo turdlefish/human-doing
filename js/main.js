@@ -2,14 +2,16 @@
 
 import * as store from './store.js';
 import { CONFIG } from './config.js';
-import { $, $$, colorVars, esc, isDark, prefs, setTheme } from './util.js';
+import { $, $$, colorVars, copyText, esc, isDark, prefs, setTheme, toast } from './util.js';
 import { showOnboarding } from './onboarding.js';
 import { createTrack } from './track.js';
 import { createTodo } from './todo.js';
 import { createPlan } from './plan.js';
 import { createUs } from './us.js';
 import { tray } from './sticker-ui.js';
-import { bridge, isNative, nativeTheme, startNative } from './native.js';
+import { bridge, isNative, nativeTheme, startNative, updateNativeSession } from './native.js';
+import { initMove } from './spacemove.js';
+import { openSheet } from './ui.js';
 import { drainOps, pushNow, runHeadless, startWidgets } from './widgets.js';
 import { startIphone } from './iphone.js';
 import { avatarHTML } from './avatars.js';
@@ -97,6 +99,17 @@ function startApp() {
   startWidgets();
   startIphone();
   if (bridge && bridge.takeRoute) openRoute(bridge.takeRoute());
+  if (!new URLSearchParams(location.search).has('widgets')) {
+    // A move to a longer space code: asks for the new code when another app made one (spacemove.js).
+    initMove({
+      ns: 'doing', app: 'Human Doing', store, toast, copyText,
+      sheet: (title, body) => openSheet({ title, body }),
+      busy: () => !!document.querySelector('.sheet-wrap'),
+      myName: () => store.readMine('profile', {}).name,
+      after: () => { updateNativeSession(); route(); },
+      cls: { input: 'inp', code: 'code-pill big', actions: 'sheet-actions', primary: 'btn', ghost: 'btn ghost', err: 'ob-err' },
+    });
+  }
 }
 
 // ── From the home-screen widgets (Android) ────────────────────────────────

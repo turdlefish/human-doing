@@ -3,12 +3,16 @@
 
 export const APP = 'Human Doing';
 export const NS = 'doing';   // local storage prefix
-export const VERSION = '1.9';
+export const VERSION = '1.10';
 export const WEBSITE = 'https://turdlefish.github.io/human-doing/';
 // What's new, by version, newest first. A phone that skipped versions sees
 // them all, 🔔 Tell sends your person everything after their version, and Us
 // lists every one. (1.4 covers 1.4 to 1.4.4, and 1.3 covers 1.3.1.)
 export const WHATS_NEW = {
+  '1.10': [
+    '🔑 Make your space code longer (Us → Your person): everything is copied to the new code and nothing is deleted. Your other apps ask for the new code',
+    'ℹ️ Us shows which version of Human Doing you\'re using (Sync & backup)',
+  ],
   '1.9': [
     '🔐 Your lists, plans and trackers are now locked to your space: only phones with your code can see or change them',
     '✨ Skipped an update? What\'s new now shows everything you missed, and 🔔 Tell sends your person everything they\'re missing',
