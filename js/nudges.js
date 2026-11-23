@@ -11,13 +11,15 @@
 // PartnerAlerts.java in Human Being). This file is the same in both apps:
 // about.js has what differs.
 //
-// Also here: What's new after an update, your version in your profile (appV),
-// and a note when the two of you have different versions.
+// Also here: What's new after an update (every version this phone skipped),
+// every update for Us, your version in your profile (appV), and a note when
+// the two of you have different versions. 🔔 Tell sends your person what's
+// new since their version, with each version's notes ({ v, notes }).
 
 import * as store from './store.js';
 import { esc, toast, uid } from './util.js';
 import { openSheet } from './ui.js';
-import { APP, NS, NUDGE_ROUTES, VERSION, WEBSITE, WHATS_NEW } from './about.js';
+import { APP, NS, NUDGE_ROUTES, OLDEST_SEEN, VERSION, WEBSITE, WHATS_NEW } from './about.js';
 
 const KEEP = 30;                      // messages kept in your document
 const KEEP_MS = 30 * 864e5;           // …and for at most a month
@@ -54,6 +56,61 @@ export function newer(a, b) {
   for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
   return false;
 }
+const byNewest = (a, b) => (newer(a, b) ? -1 : 1);
+
+/** Versions with notes after `since` (every one when not given), up to this one, newest first. */
+export function versionsSince(since) {
+  return Object.keys(WHATS_NEW).filter(v => !newer(v, VERSION) && (!since || newer(v, since))).sort(byNewest);
+}
+// A note as plain text, without its emoji and (…).
+const plain = x => x.replace(/^\S+\s/, '').replace(/ \(.*\)$/, '');
+
+// What your person is missing: every version after theirs, or else this one.
+function forThem(t) {
+  const behind = t && t.appV && newer(VERSION, t.appV) ? versionsSince(t.appV) : [];
+  return behind.length ? behind : [VERSION];
+}
+const tellLabel = t => (forThem(t).length > 1 ? `🔔 Tell ${esc(t.name)} everything since ${esc(t.appV)}` : `🔔 Tell ${esc(t.name)}`);
+
+/** Tells your person what's new: everything since their version, when theirs is older. */
+export function tellWhatsNew() {
+  const t = them();
+  if (!t) return;
+  const vs = forThem(t);
+  const lines = vs.flatMap(v => WHATS_NEW[v] || []).map(plain);
+  sendNudge('version', `${APP} ${VERSION} is here${vs.length > 1 ? `, with everything since your ${t.appV}` : ''}: ${lines.join(' · ')}`,
+    { v: VERSION, notes: Object.fromEntries(vs.map(v => [v, WHATS_NEW[v] || []])) });
+  toast(`Told ${t.name} ✨`);
+}
+
+// The notes of these versions, newest first. heading(v, i): the title above each.
+function notesHtml(vs, heading) {
+  return vs.map((v, i) => `${heading ? `<p class="wn-ver">${esc(heading(v, i))}</p>` : ''}<ul class="wn-list">${(WHATS_NEW[v] || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('');
+}
+
+/**
+ * A sheet of what's new, with 🔔 Tell. vs: the versions to show (after an
+ * update, the ones this phone skipped); every one when not given (for Us).
+ */
+export function openWhatsNew(vs, intro = '') {
+  const every = !vs;
+  vs = vs || versionsSince(null);
+  const t = them();
+  const sheet = openSheet({
+    title: every ? `Every update to ${APP} 📜` : `What's new in ${APP} ${VERSION} ✨`,
+    body: `${intro}${notesHtml(vs, every ? v => `${APP} ${v}${v === VERSION ? ' (yours)' : ''}` : vs.length > 1 ? (v, i) => `${i ? 'And in' : 'New in'} ${v}` : null)}
+      <div class="sheet-actions">
+        <button type="button" class="btn ghost" data-wn="close">Lovely</button>
+        ${t ? `<button type="button" class="btn" data-wn="tell">${tellLabel(t)}</button>` : ''}
+      </div>`,
+  });
+  sheet.el.addEventListener('click', e => {
+    const b = e.target.closest('[data-wn]');
+    if (!b) return;
+    if (b.dataset.wn === 'tell') tellWhatsNew();
+    sheet.close();
+  });
+}
 
 /** For Us: a line when you and your person have different versions ('' when the same). */
 export function versionNote() {
@@ -65,47 +122,27 @@ export function versionNote() {
     return `<p class="ver-note">💌 ${esc(t.name)} has ${APP} ${esc(theirV)} and you have ${VERSION}. Ask ${esc(t.name)} to send you the new app${site}.</p>`;
   }
   if (!theirV || newer(VERSION, theirV)) {
-    return `<p class="ver-note">📲 ${esc(t.name)} ${theirV ? `still has ${esc(theirV)}` : 'has an older version'}. Send them the new app so you're both on ${VERSION}.</p>`;
+    return `<p class="ver-note">📲 ${esc(t.name)} ${theirV ? `still has ${esc(theirV)}` : 'has an older version'}. Send them the new app so you're both on ${VERSION}.
+      <button type="button" class="link-btn" data-act="tell-new">${tellLabel(t)}</button></p>`;
   }
   return '';
 }
 
-/** After an update: What's new, once, with a button to tell your person. Also puts your version in your profile. */
-// Versions with notes this phone hasn't shown yet, newest first.
-function unseenVersions(seen) {
-  return Object.keys(WHATS_NEW)
-    .filter(v => !newer(v, VERSION) && (!seen || newer(v, seen)))
-    .sort((a, b) => (newer(a, b) ? -1 : 1));
-}
-
+/** After an update: What's new (every version this phone skipped), once. Also puts your version in your profile. */
 export function checkWhatsNew() {
   const p = store.readMine('profile', null);
-  if (p && p.appV !== VERSION) store.writeMine('profile', { ...p, appV: VERSION });
+  // The version this phone last showed What's new for. A phone from before
+  // What's new has none: then the one in your profile, or else OLDEST_SEEN.
   const seen = lsGet(SEEN_V);
+  const last = seen || (p && p.appV) || OLDEST_SEEN;
+  if (p && p.appV !== VERSION) store.writeMine('profile', { ...p, appV: VERSION });
   lsSet(SEEN_V, VERSION);
   const s = store.getSession();
   const justJoined = s && s.joined && Date.now() - s.joined < 10 * 60e3;   // a new phone: nothing to announce
-  const vs = unseenVersions(seen);
+  const vs = versionsSince(last);
   if (seen === VERSION || justJoined || !vs.length) return;
-  const news = WHATS_NEW[VERSION] || WHATS_NEW[vs[0]];
-  const t = them();
-  const sheet = openSheet({
-    title: `What's new in ${APP} ${VERSION} ✨`,
-    body: `${vs.map((v, i) => `${i ? `<p class="muted small wn-also">And in ${esc(v)}:</p>` : ''}<ul class="wn-list">${WHATS_NEW[v].map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}
-      <div class="sheet-actions">
-        <button type="button" class="btn ghost" data-wn="close">Lovely</button>
-        ${t ? `<button type="button" class="btn" data-wn="tell">🔔 Tell ${esc(t.name)}</button>` : ''}
-      </div>`,
-  });
-  sheet.el.addEventListener('click', e => {
-    const b = e.target.closest('[data-wn]');
-    if (!b) return;
-    if (b.dataset.wn === 'tell' && t) {
-      sendNudge('version', `${APP} ${VERSION} is here: ${news.map(x => x.replace(/^\S+\s/, '').replace(/ \(.*\)$/, '')).join(' · ')}`, { v: VERSION });
-      toast(`Told ${t.name} ✨`);
-    }
-    sheet.close();
-  });
+  openWhatsNew(vs, vs.length > 1
+    ? `<p class="muted small wn-intro">You skipped ${vs.length === 2 ? 'an update' : `${vs.length - 1} updates`}, so here's everything since ${esc(last)}.</p>` : '');
 }
 
 // ── Receiving ─────────────────────────────────────────────────────────────
@@ -131,13 +168,20 @@ export function checkInbox() {
   }
   showing = true;
   const when = at => new Date(at).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+  // A version message from a newer app lists each version's notes.
+  const notesOf = x => {
+    const n = x.kind === 'version' && x.v && x.notes && typeof x.notes === 'object' ? x.notes : null;
+    const vs = n ? Object.keys(n).filter(v => Array.isArray(n[v]) && n[v].length).sort(byNewest) : [];
+    return vs.length ? `<div class="nd-notes">${vs.map(v => `${vs.length > 1 ? `<span class="nd-ver">${esc(v)}</span>` : ''}<ul>${n[v].map(l => `<li>${esc(l)}</li>`).join('')}</ul>`).join('')}</div>` : '';
+  };
   const row = x => {
     const [icon, what] = KIND[x.kind] || ['💌', 'a message'];
+    const notes = notesOf(x);
     const go = x.kind === 'remind' && NUDGE_ROUTES[x.what];
     const update = x.kind === 'version' && x.v && newer(x.v, VERSION)
       ? `<small class="nd-hint">You have ${VERSION}: ask ${esc(t.name)} to send you the new app${WEBSITE ? ', or use the website' : ''}.</small>` : '';
     return `<div class="nd-item nd-${esc(x.kind)}"><span class="nd-ico" aria-hidden="true">${icon}</span>
-      <div class="nd-body"><b>${esc(x.text)}</b><small>${what} · ${esc(when(x.at))}</small>${update}</div>
+      <div class="nd-body"><b>${esc(notes ? `${APP} ${x.v} is here` : x.text)}</b>${notes}<small>${what} · ${esc(when(x.at))}</small>${update}</div>
       ${go ? `<button type="button" class="btn small" data-nd-go="${esc(go)}">Do it now</button>` : ''}</div>`;
   };
   const sheet = openSheet({

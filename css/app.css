@@ -1039,7 +1039,14 @@ details.more p { margin-top: 8px; line-height: 1.5; }
 .nd-body .nd-hint { color: var(--ink-soft); }
 .nd-item .btn { flex: none; }
 .wn-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-.wn-also { margin: 14px 2px 8px; }
+.wn-intro { margin: 0 2px 12px; }
+.wn-ver { margin: 16px 2px 8px; color: var(--ink-soft); font: 800 13px var(--font-ui); }
+.wn-ver:first-child { margin-top: 0; }
+.nd-notes { margin: 4px 0 2px; font: 600 13px/1.45 var(--font-ui); }
+.nd-notes ul { margin: 2px 0 6px; padding-left: 18px; }
+.nd-ver { display: block; margin-top: 4px; color: var(--ink-soft); font: 800 12px var(--font-ui); }
+.ver-note .link-btn { display: block; margin: 4px 0 0; padding: 4px 0; color: inherit; text-decoration: underline; text-align: left; }
+.footer-note .link-btn { margin: 2px 0 0; padding: 6px 10px; font: inherit; color: inherit; text-decoration: underline; }
 .wn-list li { padding: 11px 14px; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); font: 700 14px/1.45 var(--font-ui); }
 .ver-note { margin: 12px 0 0; padding: 10px 12px; border-radius: 14px; background: var(--c-bg, var(--surface)); color: var(--c-ink, var(--ink)); font: 700 13px/1.45 var(--font-ui); }
 .ver-note a { color: inherit; }

@@ -160,14 +160,17 @@ function setStatus(state) {
 }
 
 // ── Network ───────────────────────────────────────────────────────────────
-function headers(extra = {}) {
-  return { apikey: CONFIG.supabaseKey, Authorization: 'Bearer ' + CONFIG.supabaseKey, ...extra };
+// The database only shows (and takes) a space's rows when the request names
+// that space in its x-space header, so nobody can look through other couples'.
+function headers(extra = {}, space = session && session.space) {
+  return { apikey: CONFIG.supabaseKey, Authorization: 'Bearer ' + CONFIG.supabaseKey, ...(space ? { 'x-space': space } : {}), ...extra };
 }
 // Returns the parsed JSON reply (null when there's no body).
-async function api(query, opts = {}) {
+// space: another space than yours (only when joining one).
+async function api(query, { space, ...opts } = {}) {
   stats.requests++;
   if (opts.body) stats.up += opts.body.length;
-  const r = await fetch(apiBase() + '/rest/v1/' + CONFIG.table + query, { ...opts, headers: headers(opts.headers) });
+  const r = await fetch(apiBase() + '/rest/v1/' + CONFIG.table + query, { ...opts, headers: headers(opts.headers, space) });
   const text = await r.text().catch(() => '');
   stats.down += text.length;
   if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + text);
@@ -177,10 +180,10 @@ async function api(query, opts = {}) {
 const inList = fks => 'in.(' + fks.map(k => '"' + k + '"').join(',') + ')';
 const quote = v => '"' + v + '"';   // PostgREST: values with : or . inside or=(…) need quotes
 
-async function fetchDocs(fks) {
+async function fetchDocs(fks, space) {
   const out = [];
   for (let i = 0; i < fks.length; i += 40) {   // keeps the address a sensible length
-    const rows = await api('?select=key,value,updated_at&key=' + encodeURIComponent(inList(fks.slice(i, i + 40)))) || [];
+    const rows = await api('?select=key,value,updated_at&key=' + encodeURIComponent(inList(fks.slice(i, i + 40))), { space }) || [];
     for (const row of rows) {
       let v = row.value;
       if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { v = null; } }
@@ -360,7 +363,7 @@ export const normalizeCode = s => String(s || '').toLowerCase().trim().replace(/
 // hb: { a?, b? } (Human Being profiles, for couples who already use it).
 export async function peekSpace(code) {
   const fks = ['a', 'b'].flatMap(s => [`${NS}:${code}:p:${s}:profile`, `${HB_NS}:${code}:p:${s}:profile`]);
-  const rows = await fetchDocs(fks);
+  const rows = await fetchDocs(fks, code);
   const out = { hb: {} };
   rows.forEach(r => {
     const [ns, , , slot] = r.key.split(':');

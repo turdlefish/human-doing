@@ -5,7 +5,7 @@
 // Caches are named "doing-…" so they never touch Human Being's ("tend-…")
 // if both apps are served from the same site.
 
-const CACHE = 'doing-v20';
+const CACHE = 'doing-v21';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css', './css/doing.css',
   './js/main.js', './js/config.js', './js/util.js', './js/ui.js', './js/store.js', './js/docs.js',

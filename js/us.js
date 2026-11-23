@@ -14,7 +14,8 @@ import { addTodo, readDay, readSettings, writeMyDay, writeSettings } from './doc
 import { iphoneOn, iphoneScript, setIphone } from './iphone.js';
 import { mountFeedback } from './feedback.js';
 import { openRemind } from './remind.js';
-import { versionNote } from './nudges.js';
+import { openWhatsNew, tellWhatsNew, versionNote } from './nudges.js';
+import { APP, VERSION } from './about.js';
 
 // The iPhone widget script, made ahead so "Copy" works straight after the tap.
 let iphoneText = null;
@@ -217,7 +218,7 @@ export function createUs(root, { onTimeFormat, onTheme, onBionic } = {}) {
         ${CONFIG.mock ? syncDetails(them) : ''}
       </section>
 
-      <p class="footer-note">made with 💗 for two</p>`;
+      <p class="footer-note">made with 💗 for two<br><button type="button" class="link-btn" data-act="whats-new">📜 ${APP} ${VERSION}: every update</button></p>`;
     mountFeedback($('#u-fb', page));
     page.querySelectorAll('details').forEach((d, i) => { if (i < wasOpen.length) d.open = wasOpen[i]; });
     makeIphoneScript();
@@ -293,6 +294,8 @@ export function createUs(root, { onTimeFormat, onTheme, onBionic } = {}) {
         break;
       }
       case 'remind': openRemind(); break;
+      case 'whats-new': openWhatsNew(); break;
+      case 'tell-new': tellWhatsNew(); break;
       case 'invite': {
         const ok = await copyText(inviteText());
         toast(ok ? 'Invite copied — send it to your person 💌' : 'Could not copy — share the code instead');
@@ -413,7 +416,7 @@ export function createUs(root, { onTimeFormat, onTheme, onBionic } = {}) {
           }
           for (const [doc, d] of Object.entries(docs)) rows.push({ key: `tend:${sess.space}:p:${slot}:${doc}`, value: JSON.stringify({ t: now, d }), updated_at: new Date().toISOString() });
         }
-        await fetch(location.origin + '/rest/v1/' + CONFIG.table, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rows) });
+        await fetch(location.origin + '/rest/v1/' + CONFIG.table, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-space': sess.space }, body: JSON.stringify(rows) });
         await store.pull({ full: true });
         toast('Human Being check-ins added for you both');
         render();

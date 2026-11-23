@@ -68,7 +68,7 @@ const WANT = [ME + ":widget", ME + ":profile", ME + ":help", ME + ":todos", ME +
 
 async function api(query) {
   const r = new Request(SB_URL + "/rest/v1/tb_store" + query);
-  r.headers = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY };
+  r.headers = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "x-space": SPACE };   // the database only shows your space's rows
   return await r.loadJSON();
 }
 const later = (x, y) => !y || Date.parse(x) > Date.parse(y);
