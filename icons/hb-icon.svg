@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Tend's icon: a little potted plant with a smile. The plant shapes are
+       mirrored in tend-android/app/src/main/res/drawable/ic_launcher_foreground.xml. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFDCE8"/>
+      <stop offset="1" stop-color="#E8DDFF"/>
+    </linearGradient>
+    <g id="shapes">
+      <path d="M256 304 C256 272 254 240 256 206" fill="none" stroke-width="16" stroke-linecap="round"/>
+      <path d="M252 254 C206 258 148 230 140 160 C204 150 246 188 252 254 Z"/>
+      <path d="M260 228 C262 158 314 110 386 112 C386 184 334 228 260 228 Z"/>
+      <path d="M256 208 C240 180 246 150 264 132 C281 160 275 190 256 208 Z"/>
+      <path d="M170 330 H342 L324 418 C320 436 308 448 290 448 H222 C204 448 192 436 188 418 Z"/>
+      <path d="M172 288 H340 C352 288 362 298 362 310 V314 C362 326 352 336 340 336 H172 C160 336 150 326 150 314 V310 C150 298 160 288 172 288 Z"/>
+    </g>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g transform="translate(256 290) scale(1.12) translate(-256 -290)">
+  <!-- soft shadow, then a white sticker edge -->
+  <use href="#shapes" fill="#EBB7CD" stroke="#EBB7CD" stroke-width="30" stroke-linejoin="round" transform="translate(0 10)"/>
+  <use href="#shapes" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="30" stroke-linejoin="round"/>
+  <!-- stem and leaves -->
+  <path d="M256 304 C256 272 254 240 256 206" fill="none" stroke="#5DBB8E" stroke-width="16" stroke-linecap="round"/>
+  <path d="M252 254 C206 258 148 230 140 160 C204 150 246 188 252 254 Z" fill="#8EDDB5"/>
+  <path d="M245 245 C222 222 194 196 166 178" fill="none" stroke="#6CC59A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M260 228 C262 158 314 110 386 112 C386 184 334 228 260 228 Z" fill="#7CCFAA"/>
+  <path d="M269 219 C298 192 328 162 360 134" fill="none" stroke="#5DB58E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M296 146 C316 132 338 125 364 124" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="7" stroke-linecap="round"/>
+  <path d="M256 208 C240 180 246 150 264 132 C281 160 275 190 256 208 Z" fill="#A6E6C6"/>
+  <!-- the pot, with a face -->
+  <path d="M170 330 H342 L324 418 C320 436 308 448 290 448 H222 C204 448 192 436 188 418 Z" fill="#FFB9CB"/>
+  <path d="M172 288 H340 C352 288 362 298 362 310 V314 C362 326 352 336 340 336 H172 C160 336 150 326 150 314 V310 C150 298 160 288 172 288 Z" fill="#F59AB2"/>
+  <path d="M176 300 H262" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="198" cy="400" rx="17" ry="10" fill="#FF6F9F" fill-opacity=".45"/>
+  <ellipse cx="314" cy="400" rx="17" ry="10" fill="#FF6F9F" fill-opacity=".45"/>
+  <circle cx="222" cy="380" r="12.5" fill="#5B3A50"/>
+  <circle cx="290" cy="380" r="12.5" fill="#5B3A50"/>
+  <circle cx="226.5" cy="375" r="4.6" fill="#FFFFFF"/>
+  <circle cx="294.5" cy="375" r="4.6" fill="#FFFFFF"/>
+  <path d="M245 394 Q256 405 267 394" fill="none" stroke="#5B3A50" stroke-width="8" stroke-linecap="round"/>
+  <!-- sparkles -->
+  <path d="M118 286 L123 298 L135 303 L123 308 L118 320 L113 308 L101 303 L113 298 Z" fill="#FFFFFF"/>
+  <path d="M404 222 L408 232 L418 236 L408 240 L404 250 L400 240 L390 236 L400 232 Z" fill="#FFE08A"/>
+  </g>
+</svg>

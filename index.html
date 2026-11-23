@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Human Doing</title>
+  <meta name="description" content="A soft little space for two: trackers, shared to-do lists and cute time-block plans.">
+  <meta name="theme-color" content="#FFF4F8">
+  <script>
+    // Pick pastel or galaxy before first paint (avoids a flash of the wrong theme).
+    try {
+      var t = (JSON.parse(localStorage.getItem('doing:prefs')) || {}).theme || 'auto';
+      if (t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark';
+    } catch (e) {}
+  </script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Human Doing">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Gaegu:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/doing.css">
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand"><img src="icons/icon.svg" alt="" class="brand-icon">Human Doing<span id="mock-badge" class="mock-badge" hidden>test server</span></div>
+      <div class="topbar-right">
+        <span class="sync" id="sync" data-state="idle" role="status"><span class="dot"></span><span class="sync-txt"></span></span>
+        <button type="button" class="duo" id="duo" aria-label="You and your person — open settings"></button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="view" id="view-track" data-view="track" aria-label="Tracking"></section>
+      <section class="view" id="view-todo" data-view="todo" aria-label="To-do lists"></section>
+      <section class="view" id="view-plan" data-view="plan" aria-label="Plans"></section>
+      <section class="view" id="view-us" data-view="us" aria-label="Us"></section>
+      <div id="tray" aria-label="Sticker drawer"></div>
+    </main>
+
+    <nav class="tabbar" aria-label="Sections">
+      <button type="button" class="tab" data-tab="track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M8.2 16.2v-3.4M12 16.2V8.2M15.8 16.2v-5.6"/></svg>
+        <span>Tracking</span>
+      </button>
+      <button type="button" class="tab" data-tab="todo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16.5" rx="4.5"/><path d="M8.4 12.4l2.5 2.5 4.8-5.2"/></svg>
+        <span>To-Do</span>
+      </button>
+      <button type="button" class="tab" data-tab="plan">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="16" rx="4"/><path d="M3.5 9.5h17M8.5 2.8v3.4M15.5 2.8v3.4M7.5 13.5h5M7.5 16.8h8"/></svg>
+        <span>Plan</span>
+      </button>
+      <button type="button" class="tab" data-tab="us">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 18.5S3 15.2 3 11a3.1 3.1 0 0 1 5.6-1.9A3.1 3.1 0 0 1 14.2 11c0 4.2-5.6 7.5-5.6 7.5z"/><path d="M14.6 7.4a3.1 3.1 0 0 1 6.4 1.6c0 3.1-3.6 5.6-4.9 6.4"/></svg>
+        <span>Us</span>
+      </button>
+    </nav>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
