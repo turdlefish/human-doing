@@ -579,6 +579,8 @@ select.inp { appearance: none; -webkit-appearance: none; background-image: linea
 .blk-stk { position: absolute; top: 4px; right: 6px; width: 38px; height: 38px; transform: rotate(9deg); pointer-events: none; filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 3px rgba(120, 80, 110, .25)); }
 .blk-stk > *, .if-stk > *, .bi-stk > *, .stk-pick-in > * { width: 100%; height: 100%; object-fit: contain; display: grid; place-items: center; font-size: inherit; }
 .blk-stk .stk-emoji { font-size: 26px; line-height: 1; }
+:is(.blk-stk, .if-stk, .bi-stk, .stk-pick-in) > :is(.stk-img, .stk-missing) { width: 100%; height: 100%; object-fit: contain; font-size: inherit; }
+:is(.blk-stk, .if-stk, .bi-stk, .stk-pick-in) > .stk-photo:not(.shaped) { object-fit: cover; }
 .blk.has-stk .blk-title { padding-right: 40px; }
 .blk.tiny .blk-stk { top: 50%; width: 24px; height: 24px; transform: translateY(-50%) rotate(9deg); }
 .blk.tiny.has-stk .blk-title { padding-right: 24px; }

@@ -648,7 +648,7 @@ export function createPlan(root) {
 
   // A sticker as an event's icon: your ⭐ favourites, your photo stickers and the
   // drawn packs (not washi tape or words, which don't fit on an event).
-  const STK_TABS = ['favs', 'work', 'cute', 'nature', 'cozy', 'chores', 'sports', 'hobbies', 'emoji', 'ours'];
+  const STK_TABS = ['favs', 'ours', 'work', 'travel', 'cute', 'nature', 'cozy', 'chores', 'sports', 'hobbies', 'emoji'];
   let stkTab = null;
   function stkItems(tab) {
     if (tab === 'favs') return stickerFavs().filter(k => !/^(washi|word):/.test(k));

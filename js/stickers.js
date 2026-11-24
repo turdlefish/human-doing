@@ -428,6 +428,69 @@ const SVG = {
   folder: `<path d="M10 30 a7 7 0 0 1 7 -7 H39 l8 8 H83 a7 7 0 0 1 7 7 V77 a7 7 0 0 1 -7 7 H17 a7 7 0 0 1 -7 -7 Z" fill="#BFDDF7" ${st('#7FAEDB')}/>
     <rect x="22" y="33" width="42" height="10" rx="2" fill="#fff" opacity=".85"/>
     <path d="M10 43 H90" ${st('#7FAEDB', 3)}/>${face(50, 63)}`,
+
+  // ── Travel ──
+  plane: `<g transform="rotate(-18 50 52)">
+    <path d="M40 44 L22 24 L14 26 L28 46 Z" fill="#DCEBFF" ${st('#8FB3E6', 3)}/>
+    <path d="M12 48 L6 32 L15 31 L26 44 Z" fill="#FFB5C8" ${st('#E89AAE', 3)}/>
+    <path d="M10 50 C10 42 20 38 32 38 H74 C86 38 93 44 93 50 C93 56 86 62 74 62 H32 C20 62 10 58 10 50 Z" fill="#F7FBFF" ${st('#8FB3E6')}/>
+    <path d="M44 56 L28 80 L37 82 L60 58 Z" fill="#DCEBFF" ${st('#8FB3E6', 3)}/>
+    <path d="M80 43.5 C84.5 43.5 87.5 46 88.5 49.5 H80 Z" fill="#BFE0FF"/>
+    ${face(58, 50, 0.72)}</g>`,
+
+  suitcase: `<path d="M38 26 V18 a4 4 0 0 1 4 -4 H58 a4 4 0 0 1 4 4 V26" fill="none" ${st('#C98DA6', 4.5)}/>
+    <rect x="16" y="26" width="68" height="56" rx="10" fill="#FFC9D8" ${st('#E08FA8')}/>
+    <line x1="33" y1="27" x2="33" y2="81" ${st('#E08FA8', 3)}/><line x1="67" y1="27" x2="67" y2="81" ${st('#E08FA8', 3)}/>
+    <circle cx="28" cy="88" r="4.5" fill="#9C7B8C"/><circle cx="72" cy="88" r="4.5" fill="#9C7B8C"/>
+    <rect x="70" y="33" width="11" height="8" rx="2" fill="#BFE3D2" transform="rotate(12 75 37)"/>
+    ${face(50, 56, 0.85)}`,
+
+  passport: `<rect x="22" y="12" width="56" height="76" rx="8" fill="#9DB4EE" ${st('#5F7FD6')}/>
+    <circle cx="50" cy="30" r="9" fill="none" ${st('#FFE59A', 2.8)}/>
+    <path d="M41 30 H59 M50 21 C46 25 46 35 50 39 C54 35 54 25 50 21" fill="none" ${st('#FFE59A', 2.2)}/>
+    <rect x="35" y="73" width="30" height="5" rx="2.5" fill="#FFE59A"/>
+    ${face(50, 55, 0.85)}`,
+
+  map: `<path d="M12 22 L36 14 L64 22 L88 14 V78 L64 86 L36 78 L12 86 Z" fill="#FFF4C9" ${st('#D9B65A')}/>
+    <path d="M36 14 V78 M64 22 V86" ${st('#D9B65A', 2.5)}/>
+    <path d="M20 72 C30 62 40 68 46 56 C52 44 62 50 70 40" fill="none" stroke="#E08FA8" stroke-width="3.2" stroke-dasharray="0.5 6.5" stroke-linecap="round"/>
+    <path d="M72 18 C66 18 62 22 62 27.5 C62 34 72 43 72 43 C72 43 82 34 82 27.5 C82 22 78 18 72 18 Z" fill="#FF8FB3" ${st('#D96F95', 2.5)}/><circle cx="72" cy="27.5" r="3.5" fill="#fff"/>
+    ${face(28, 42, 0.68)}`,
+
+  globe: `<path d="M50 80 V88 M36 90 H64" ${st('#9C7B8C', 4.5)}/>
+    <path d="M22 70 A34 34 0 0 0 78 22" fill="none" ${st('#C9A4B4', 3.5)}/>
+    <circle cx="50" cy="46" r="30" fill="#BFE0FF" ${st('#7FAEDB')}/>
+    <path d="M30 32 C36 28 44 32 42 38 C40 44 32 42 28 46 C26 40 26 36 30 32 Z M57 24 C65 24 73 30 73 36 C67 38 63 34 57 36 C53 32 53 26 57 24 Z M58 56 C64 54 72 55 74 59 C70 67 62 70 56 68 C54 63 54 58 58 56 Z" fill="#A8D8B9"/>
+    ${face(46, 50, 0.85)}`,
+
+  palm: `<ellipse cx="50" cy="84" rx="36" ry="9" fill="#FFE5A8" ${st('#E0B66A', 3)}/>
+    <path d="M52 82 C50 66 50 52 56 34" fill="none" ${st('#B07C5A', 6)}/>
+    <path d="M56 34 C46 24 32 24 21 32 C33 30 44 32 56 36 Z M56 34 C62 22 76 20 87 28 C75 28 64 30 56 36 Z M56 34 C50 40 44 50 43 58 C50 48 54 42 58 36 Z M56 34 C64 38 72 46 74 56 C68 48 62 42 56 36 Z" fill="#9ED6A8" ${st('#6FB582', 2.5)}/>
+    <circle cx="52" cy="39" r="4" fill="#B07C5A"/><circle cx="60" cy="39" r="4" fill="#B07C5A"/>
+    ${face(32, 84, 0.55)}`,
+
+  umbrella: `<ellipse cx="50" cy="86" rx="36" ry="7" fill="#FFE5A8" ${st('#E0B66A', 3)}/>
+    <path d="M50 44 L55 86" ${st('#9C7B8C', 4)}/>
+    <path d="M12 46 C16 26 32 15 50 15 C68 15 84 26 88 46 C82 42 75 42 69 46 C63 42 56 42 50 46 C44 42 37 42 31 46 C25 42 18 42 12 46 Z" fill="#FFB5C8" ${st('#E08FA8')}/>
+    <path d="M31 46 C33 30 41 20 50 15 M69 46 C67 30 59 20 50 15" fill="none" ${st('#E08FA8', 2.5)}/>
+    ${face(50, 31, 0.75)}`,
+
+  ticket: `<path d="M12 30 H88 V44 A6 6 0 0 0 88 56 V70 H12 V56 A6 6 0 0 0 12 44 Z" fill="#FFE59A" ${st('#E0B23E')}/>
+    <line x1="66" y1="33" x2="66" y2="67" stroke="#E0B23E" stroke-width="3" stroke-dasharray="3 4" stroke-linecap="round"/>
+    <path d="M77 43 L79.5 48 L85 48.6 L81 52 L82 57.5 L77 54.8 L72 57.5 L73 52 L69 48.6 L74.5 48 Z" fill="#FF8FB3"/>
+    ${face(38, 50, 0.85)}`,
+
+  balloon: `<path d="M50 10 C28 10 16 26 16 42 C16 58 34 68 42 76 H58 C66 68 84 58 84 42 C84 26 72 10 50 10 Z" fill="#FFC9D8" ${st('#E08FA8')}/>
+    <path d="M50 10 C40 22 38 50 42 76 M50 10 C60 22 62 50 58 76" fill="none" ${st('#E08FA8', 2.5)}/>
+    <path d="M42 76 L44 84 M58 76 L56 84" ${st('#9C7B8C', 2.5)}/>
+    <rect x="40" y="83" width="20" height="11" rx="2.5" fill="#E8C4A6" ${st('#B07C5A', 3)}/>
+    ${face(50, 40, 0.85)}`,
+
+  car: `<path d="M14 62 V52 C14 46 18 44 24 43 L32 30 C34 27 37 26 40 26 H62 C66 26 69 28 71 31 L78 43 C84 44 88 47 88 53 V62 C88 65 86 67 83 67 H19 C16 67 14 65 14 62 Z" fill="#BFE3D2" ${st('#6FB582')}/>
+    <path d="M36 43 L41 33 H50 V43 Z M56 43 V33 H62 C64 33 65 34 66 35 L70 43 Z" fill="#F3FBFF" ${st('#6FB582', 2.5)}/>
+    <circle cx="30" cy="68" r="8" fill="#6E5263" ${st('#4E3A47', 2.5)}/><circle cx="72" cy="68" r="8" fill="#6E5263" ${st('#4E3A47', 2.5)}/>
+    <circle cx="30" cy="68" r="3" fill="#D8C7D0"/><circle cx="72" cy="68" r="3" fill="#D8C7D0"/>
+    ${face(51, 54, 0.7)}`,
 };
 
 // Washi tape patterns (pattern ids are safe to repeat — each tape is its own image).
@@ -466,6 +529,7 @@ export const CATEGORIES = [
   { id: 'sports', label: 'Sports', icon: '⚽', items: ['soccer', 'basketball', 'tennis', 'dumbbell', 'sneaker', 'bicycle', 'yogamat', 'trophy', 'medal'].map(k => 'svg:' + k) },
   { id: 'hobbies', label: 'Hobbies', icon: '🎨', items: ['palette', 'guitar', 'camera', 'books', 'yarn', 'gamepad', 'headphones', 'puzzle', 'clapper'].map(k => 'svg:' + k) },
   { id: 'work', label: 'Work', icon: '💼', items: ['laptop', 'briefcase', 'mug', 'calendar', 'clipboard', 'sticky', 'pencil', 'chart', 'alarm', 'folder', 'check', 'clip'].map(k => 'svg:' + k) },
+  { id: 'travel', label: 'Travel', icon: '✈️', items: ['plane', 'suitcase', 'passport', 'map', 'globe', 'palm', 'umbrella', 'ticket', 'balloon', 'car', 'camera', 'sun'].map(k => 'svg:' + k) },
   { id: 'washi', label: 'Washi', icon: '🎀', items: Object.keys(WASHI).map(k => 'washi:' + k) },
   { id: 'words', label: 'Words', icon: '💬', items: ['custom', ...WORDS.map(([c, t]) => `word:${c}:${t}`)] },
   { id: 'emoji', label: 'Emoji', icon: '😊', items: EMOJI.map(e => 'emoji:' + e) },
