@@ -41,7 +41,7 @@ const DOC = fk => DOC_PREFIX + fk;
 // Slot "m" is the person who makes the app: their feedback inbox ticks notes
 // off in <ns>:<space>:p:m:feedback (see feedback.js). Read only, never written here.
 // Your person's documents that this phone downloads (see docs.js).
-const PARTNER_READS = /^(profile|help|shared(-\d{4}(-\d{2})?)?|todos|schedules|gifts|stickerbox|feedback|nudges)$/;
+const PARTNER_READS = /^(profile|help|shared(-\d{4}(-\d{2})?)?|todos|schedules|gifts|stickerbox|feedback|nudges|dates)$/;
 export const partnerReads = doc => PARTNER_READS.test(doc);
 // Human Being documents shown here too (both of yours): your photo stickers,
 // and your check-ins (the last few weeks, and a yearly archive from 2026 on),

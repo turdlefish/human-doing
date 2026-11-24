@@ -5,6 +5,25 @@ import { CATEGORIES, defaultSize, stickerInner, stickerKind, wordKey } from './s
 import { COLOR_KEYS, clamp, esc, prefs, setPref, toast, uid, vibrate } from './util.js';
 import { promptSheet } from './ui.js';
 import { addFromFile, chooseShape, customKeys, pickPhoto } from './custom.js';
+import * as store from './store.js';
+
+// ⭐ Favourites: stickers you keep at hand, first in the drawer and in a plan
+// event's sticker picker. Kept in your profile, so they follow you to the
+// website too. Hold a sticker in the drawer to add it, or take it out.
+export function stickerFavs() {
+  if (!store.getSession()) return [];
+  const f = (store.readMine('profile', {}) || {}).stickerFavs;
+  return Array.isArray(f) ? f.filter(k => typeof k === 'string' && k.includes(':')) : [];
+}
+/** Adds a sticker to your favourites, or takes it out. Returns whether it's a favourite now. */
+export function toggleFav(k) {
+  const p = store.readMine('profile', {}) || {};
+  const f = stickerFavs();
+  const on = !f.includes(k);
+  store.writeMine('profile', { ...p, stickerFavs: on ? [k, ...f].slice(0, 48) : f.filter(x => x !== k) });
+  return on;
+}
+const FAV_HOLD_MS = 500;
 
 // opts:
 //   el             layer element (absolutely positioned over the page)
@@ -220,22 +239,27 @@ let ghost = null;
 
 function trayEl() { return document.getElementById('tray'); }
 
-function itemHTML(k) {
+function itemHTML(k, favs = new Set()) {
   if (k === 'custom') return `<button type="button" class="tray-item custom" data-k="custom" aria-label="Write your own words">✏️<small>your own</small></button>`;
   if (k === 'upload') return `<button type="button" class="tray-item custom" data-k="upload" aria-label="Make a sticker from a photo">📷<small>add photo</small></button>`;
   const kind = stickerKind(k);
   return `<button type="button" class="tray-item ${kind === 'washi' || kind === 'word' ? 'wide' : ''}" data-k="${esc(k)}" data-kind="${kind}" aria-label="Add sticker">
     <span class="stk preview" data-kind="${kind}" style="--s:${kind === 'washi' ? 104 : kind === 'word' ? 56 : kind === 'emoji' ? 46 : 52}"><span class="stk-body">${stickerInner(k)}</span></span>
+    ${favs.has(k) ? '<span class="tray-star" aria-label="Favourite">⭐</span>' : ''}
   </button>`;
 }
 
 function itemsFor(c) {
+  if (c.id === 'favs') return stickerFavs();
   return c.id === 'ours' ? ['upload', ...customKeys()] : c.items;
 }
 
 function build() {
   const el = trayEl();
-  const c = CATEGORIES.find(x => x.id === cat) || CATEGORIES[1];
+  const c = CATEGORIES.find(x => x.id === cat) || CATEGORIES.find(x => x.id === 'cute');
+  const favs = new Set(stickerFavs());
+  const items = itemsFor(c);
+  const keepScroll = el.querySelector('.tray-strip')?.scrollLeft || 0;
   el.innerHTML = `
     <div class="tray-head">
       <div class="tray-tabs" role="tablist">${CATEGORIES.map(x => `
@@ -244,8 +268,11 @@ function build() {
       <button type="button" class="btn small tray-done">Done</button>
     </div>
     ${target && target.note ? `<p class="tray-note">${esc(target.note)}</p>` : ''}
-    <div class="tray-strip">${itemsFor(c).map(itemHTML).join('')}</div>
-    <p class="tray-tip">${c.id === 'ours' ? 'make stickers from your photos · you can both use them' : 'tap or drag up to add · tap a sticker to move or resize · tap away to set it down, tap away again when you’re done'}</p>`;
+    <div class="tray-strip">${items.length ? items.map(k => itemHTML(k, favs)).join('') : '<p class="tray-empty">Hold any sticker for a moment to add it here ⭐</p>'}</div>
+    <p class="tray-tip">${c.id === 'ours' ? 'make stickers from your photos · you can both use them · hold one to ⭐ it'
+      : c.id === 'favs' ? 'your favourites · tap or drag up to add · hold one to take it out'
+        : 'tap or drag up to add · hold one to ⭐ it · tap a sticker on the page to move or resize it'}</p>`;
+  if (keepScroll) el.querySelector('.tray-strip').scrollLeft = keepScroll;
 }
 
 async function addCustomWord() {
@@ -296,16 +323,30 @@ function wireTray() {
   el.addEventListener('pointerdown', e => {
     const it = e.target.closest('.tray-item');
     if (!it) return;
-    press = { k: it.dataset.k, x: e.clientX, y: e.clientY, dragging: false };
+    press = { k: it.dataset.k, x: e.clientX, y: e.clientY, dragging: false, held: false, timer: null };
+    // Held still for a moment: ⭐ favourite it (or take it out).
+    if (press.k !== 'custom' && press.k !== 'upload') {
+      const p = press;
+      p.timer = setTimeout(() => {
+        if (press !== p || p.dragging) return;
+        p.held = true;
+        const on = toggleFav(p.k);
+        vibrate(12);
+        toast(on ? 'Added to ⭐ Favourites' : 'Taken out of ⭐ Favourites');
+        build();
+      }, FAV_HOLD_MS);
+    }
   });
   window.addEventListener('pointermove', e => {
     if (!press) return;
     const dx = e.clientX - press.x, dy = e.clientY - press.y;
     if (!press.dragging) {
       if (press.k !== 'custom' && press.k !== 'upload' && dy < -10 && Math.abs(dy) > Math.abs(dx)) {
+        clearTimeout(press.timer);
         press.dragging = true;
         startGhost(press.k, e.clientX, e.clientY);
       } else if (Math.abs(dx) > 10) {
+        clearTimeout(press.timer);
         press = null;   // horizontal swipe = scrolling the drawer
       }
       return;
@@ -316,6 +357,8 @@ function wireTray() {
     if (!press) return;
     const p = press;
     press = null;
+    clearTimeout(p.timer);
+    if (p.held) return;   // that was a hold: ⭐, not adding
     if (p.dragging) {
       ghost?.remove();
       ghost = null;
@@ -328,6 +371,7 @@ function wireTray() {
     else target.add(p.k);
   });
   window.addEventListener('pointercancel', () => {
+    if (press) clearTimeout(press.timer);
     press = null;
     ghost?.remove();
     ghost = null;

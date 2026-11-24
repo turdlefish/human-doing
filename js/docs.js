@@ -14,6 +14,7 @@
 //     schedules-private your plans that are just yours (see readMySchedules)
 //     widget            today's tracker summary for your iPhone widgets (only once
 //                       you've copied their script: settings.iphone; see iphone.js)
+//     dates-secret      your surprises' details (date nights: see dates.js)
 //
 //   Shared with your person:
 //     profile           { name, color, avatar, emoji }
@@ -38,6 +39,8 @@
 //     all      everything: also each day's cycle { flow, symptoms }
 //     todos             your shared groups, tasks and subtasks, and your edits to your person's
 //     schedules, gifts  Plan, the same as in Human Being
+//     dates             date nights: the dates you planned, your words and photos on
+//                       your person's, your reminder (see dates.js)
 //     stickerbox        your photo stickers (your Human Being ones are shown as well)
 //     feedback          notes for making the app better: { items: [note], marks: { <your person's
 //                       note id>: { done, t } } } (feedback.js, on Us)
@@ -71,6 +74,7 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 // ── Settings ──────────────────────────────────────────────────────────────
 export const BUILT_IN = [
   { id: 'work', name: 'Work day', emoji: '💼', color: 'sky' },
+  { id: 'dates', name: 'Date nights', emoji: '💞', sticker: 'heart', color: 'pink' },
   { id: 'cycle', name: 'Cycle', emoji: '🩸', color: 'coral' },
   { id: 'water', name: 'Water', emoji: '💧', color: 'sky' },
   { id: 'caffeine', name: 'Caffeine', emoji: '☕', color: 'peach' },
@@ -85,7 +89,7 @@ const RETIRED_KEYS = ['sleep', 'mood', 'moodAt'];
 const DEFAULT_SETTINGS = {
   trackers: {
     order: BUILT_IN.filter(t => !t.idea).map(t => t.id),
-    on: { work: true, water: true, caffeine: true },
+    on: { work: true, dates: true, water: true, caffeine: true },
     own: [],              // your own: [{ id: 'own-…', name, sticker, color, type, unit?, goal?, options? }]
     share: {},            // { <tracker>: true }: everything starts private
     tally: { work: true },  // which trackers get a tally on the month view
@@ -569,6 +573,18 @@ export function setGroupPrivate(id, makePrivate) {
 //   2 (v1.3)  Sleep and mood moved to Human Being: what was logged of them here
 //             is deleted from your months, archives and shared copies, and they
 //             come out of the tracker settings.
+// Date nights came in 1.13: switched on once (after the work day) for everyone
+// whose settings came before it. Turning it off afterwards sticks.
+export function addDatesTracker() {
+  if (!store.getSession() || !store.readMine('settings', null)) return false;
+  const s = readSettings();
+  if (s.trackers.datesAdded) return false;
+  const order = s.trackers.order.filter(id => id !== 'dates');
+  order.splice(order.indexOf('work') + 1, 0, 'dates');
+  writeSettings({ ...s, trackers: { ...s.trackers, order, on: { ...s.trackers.on, dates: true }, datesAdded: true } });
+  return true;
+}
+
 export function cleanUpOldTrackers() {
   if (!store.getSession() || !store.readMine('settings', null)) return false;
   const s = readSettings();

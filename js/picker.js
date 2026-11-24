@@ -16,6 +16,7 @@ import { HB, hbIcon, hbOn } from './moodsleep.js';
 const BUILT_IN_DESC = {
   work: 'WFH, office, overtime, leave + hours', cycle: 'periods, symptoms, phase predictions', water: 'glasses a day',
   caffeine: 'cups and time of the last one', meds: 'doses, running-low alerts', walk: 'get up for a walk, with nudges',
+  dates: 'how long since each of you planned one, photos, a reminder',
 };
 const partnerName = () => store.readPartner('profile', null)?.name || 'your person';
 const shareRow = (flag, on, label, hint) => `
@@ -28,6 +29,7 @@ const PREVIEW_NOTE = {
   cycle: 'An example. Your phases show once you log a period, and it stays private until you choose to share.',
   meds: 'An example. Once it\'s on, you add your own medicines.',
   walk: 'An example. Your walks and nudges are in the settings underneath.',
+  dates: 'An example. Your dates, photos and reminder are on its page.',
 };
 
 /**
@@ -403,12 +405,12 @@ function settingsBox(box, id, { onMeds = () => {}, onWork = () => {} } = {}) {
     const st = readSettings();
     box.innerHTML = `
       ${id === 'walk' ? walkHTML(st) : ''}
-      ${id === 'cycle' ? `
+      ${id === 'dates' ? `<p class="muted small pref-hint">Always shared with ${esc(partnerName())}: it's for the two of you, and surprises stay secret. Your reminder is on its page.</p>` : id === 'cycle' ? `
         <div class="field cycle-share" style="${colorVars('coral')}"><span>Share with ${esc(partnerName())}</span>
           ${shareRadios(st.cycle.share, store.readPartner('profile', null)?.name || 'Your person')}
           <small class="muted pref-hint">Private by default. Period support is picked day by day on the cycle page.</small></div>`
         : shareRow('share', st.trackers.share[id], `Share with ${esc(partnerName())}`, st.trackers.share[id] ? (id === 'walk' ? 'they see how many walks and how long' : 'they see this tracker\'s days') : 'off until you switch it on')}
-      ${shareRow('tally', st.trackers.tally[id], '📊 Monthly tally', id === 'walk' ? 'walks and minutes, day by day' : 'adds it up on the month view')}
+      ${id === 'dates' ? '' : shareRow('tally', st.trackers.tally[id], '📊 Monthly tally', id === 'walk' ? 'walks and minutes, day by day' : 'adds it up on the month view')}
       ${id === 'water' ? `<div class="hrs-row goal-row"><span>💧 Glasses a day</span><span class="stepper">
           <button type="button" data-goal="-1" aria-label="Fewer">−</button><b>${st.trackers.goals.water}</b><button type="button" data-goal="1" aria-label="More">+</button></span></div>` : ''}
       ${id === 'caffeine' ? `<label class="hrs-row goal-row"><span>☕ Cut-off time<small class="muted pref-hint">the caffeine widget warns you after it (clear it for none)</small></span>

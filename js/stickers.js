@@ -379,6 +379,55 @@ const SVG = {
     ${[0, 1, 2, 3, 4].map(i => `<path d="M${20 + i * 14} 40 L${28 + i * 14} 40 L${22 + i * 14} 51 L${14 + i * 14} 51 Z" fill="#6E5263"/>`).join('')}
     <rect x="22" y="60" width="30" height="4" rx="2" fill="#FFC9DC"/><rect x="22" y="70" width="20" height="4" rx="2" fill="#C3E1FF"/>
     <path d="M70 78 C63 73 60 69 62 66 C64 63 68 64 70 67 C72 64 76 63 78 66 C80 69 77 73 70 78 Z" fill="#F290B5"/>`,
+
+  // ── Work ──
+  laptop: `<rect x="20" y="20" width="60" height="44" rx="6" fill="#DCEBFF" ${st('#8FB3E6')}/>
+    <rect x="26" y="26" width="48" height="32" rx="3" fill="#F7FBFF"/>
+    <path d="M10 70 H90 L83 81 H17 Z" fill="#C9DCF7" ${st('#8FB3E6')}/>
+    <line x1="43" y1="75.5" x2="57" y2="75.5" ${st('#8FB3E6', 3)}/>${face(50, 41, 0.85)}`,
+
+  briefcase: `<path d="M38 31 V23 a5 5 0 0 1 5 -5 H57 a5 5 0 0 1 5 5 V31" fill="none" ${st('#B07C5A', 4.5)}/>
+    <rect x="12" y="31" width="76" height="52" rx="10" fill="#EBC6A6" ${st('#B07C5A')}/>
+    <line x1="12" y1="49" x2="88" y2="49" ${st('#B07C5A', 3)}/>
+    <rect x="43" y="44" width="14" height="10" rx="2.5" fill="#FFE59A" ${st('#B07C5A', 2.5)}/>${face(50, 67, 0.85)}`,
+
+  mug: `<path d="M37 9 c-4 6 4 9 0 15 M50 7 c-4 6 4 9 0 15 M63 9 c-4 6 4 9 0 15" fill="none" ${st('#C9B6E8', 3)}/>
+    <path d="M72 44 h6 a10 10 0 0 1 0 20 h-6" fill="none" ${st('#E08FA8', 5)}/>
+    <path d="M20 32 H76 V68 a15 15 0 0 1 -15 15 H35 a15 15 0 0 1 -15 -15 Z" fill="#FFD3E0" ${st('#E08FA8')}/>
+    <ellipse cx="48" cy="34" rx="25" ry="3.5" fill="#B98466" opacity=".55"/>${face(48, 58)}`,
+
+  calendar: `<rect x="14" y="20" width="72" height="66" rx="10" fill="#fff" ${st('#E89AAE')}/>
+    <path d="M14 39 V30 a10 10 0 0 1 10 -10 H76 a10 10 0 0 1 10 10 V39 Z" fill="#FFB5C8" ${st('#E89AAE')}/>
+    <line x1="33" y1="12" x2="33" y2="27" ${st('#9C7B8C', 5)}/><line x1="67" y1="12" x2="67" y2="27" ${st('#9C7B8C', 5)}/>
+    <g fill="#F7C9D6"><circle cx="27" cy="76" r="3"/><circle cx="73" cy="76" r="3"/></g>${face(50, 59)}`,
+
+  clipboard: `<rect x="18" y="16" width="64" height="74" rx="9" fill="#E8C9A8" ${st('#B98C66')}/>
+    <rect x="26" y="26" width="48" height="56" rx="4" fill="#FFFDF6"/>
+    <rect x="37" y="9" width="26" height="13" rx="4.5" fill="#CCD6E2" ${st('#8D9AAB', 3)}/>
+    <path d="M32 38 l3.5 3.5 l6 -7" fill="none" ${st('#6FBF93', 3.2)}/><line x1="47" y1="38" x2="67" y2="38" ${st('#DDCCB4', 3.2)}/>
+    ${face(50, 63, 0.85)}`,
+
+  sticky: `<path d="M14 16 H86 V66 L66 86 H14 Z" fill="#FFF0A0" ${st('#E3C55A')}/>
+    <path d="M86 66 H71 a5 5 0 0 0 -5 5 V86" fill="#F3D873" ${st('#E3C55A')}/>
+    <rect x="36" y="9" width="28" height="11" rx="2" fill="#BFE3D2" opacity=".9" transform="rotate(-5 50 14)"/>${face(48, 48)}`,
+
+  pencil: `<g transform="rotate(-38 50 50)"><rect x="18" y="37" width="50" height="26" rx="4" fill="#FFE08A" ${st('#E0AE3E')}/>
+    <line x1="22" y1="50" x2="66" y2="50" ${st('#F2C35A', 2)} opacity=".7"/>
+    <path d="M68 37 L90 50 L68 63 Z" fill="#F6D7B8" ${st('#C49373')}/><path d="M83.5 46 L90 50 L83.5 54 Z" fill="#6E5263"/>
+    <rect x="7" y="37" width="13" height="26" rx="4" fill="#FFB5C8" ${st('#E89AAE')}/></g>${face(45, 54, 0.8)}`,
+
+  chart: `<rect x="12" y="14" width="76" height="72" rx="11" fill="#F3F8FF" ${st('#9CB8E6')}/>
+    <rect x="24" y="58" width="12" height="18" rx="3" fill="#FFC2D1"/><rect x="44" y="46" width="12" height="30" rx="3" fill="#BFE3D2"/><rect x="64" y="34" width="12" height="42" rx="3" fill="#CDBDF5"/>
+    <path d="M22 48 L38 37 L50 41 L72 22" fill="none" ${st('#7A9AD6', 3.5)}/><path d="M63 21 L73 21 L73 31" fill="none" ${st('#7A9AD6', 3.5)}/>`,
+
+  alarm: `<circle cx="26" cy="22" r="10" fill="#FFB5C8" ${st('#E89AAE', 3.5)}/><circle cx="74" cy="22" r="10" fill="#FFB5C8" ${st('#E89AAE', 3.5)}/>
+    <path d="M30 81 L23 90 M70 81 L77 90" ${st('#9C7B8C', 4.5)}/>
+    <circle cx="50" cy="54" r="33" fill="#FFF7FA" ${st('#E89AAE')}/>
+    <path d="M50 30 V35 M74 54 H69 M50 78 V73 M26 54 H31" ${st('#E3B8C8', 3)}/>${face(50, 56, 0.95)}`,
+
+  folder: `<path d="M10 30 a7 7 0 0 1 7 -7 H39 l8 8 H83 a7 7 0 0 1 7 7 V77 a7 7 0 0 1 -7 7 H17 a7 7 0 0 1 -7 -7 Z" fill="#BFDDF7" ${st('#7FAEDB')}/>
+    <rect x="22" y="33" width="42" height="10" rx="2" fill="#fff" opacity=".85"/>
+    <path d="M10 43 H90" ${st('#7FAEDB', 3)}/>${face(50, 63)}`,
 };
 
 // Washi tape patterns (pattern ids are safe to repeat — each tape is its own image).
@@ -405,8 +454,10 @@ const EMOJI = ['🌷', '🌸', '🌼', '🌻', '🌈', '☀️', '🌙', '⭐', 
   '💕', '💞', '🫶', '🧸', '🎈', '🕯️', '🛁', '📚', '🎧', '🎨', '🧶', '✏️', '📌', '⏰', '💤', '🧘', '🚶', '🥗',
   '💧', '🫧', '🛌', '🎮', '🎬', '🌊', '🎉', '🏡'];
 
-// 'ours' is filled in by the sticker drawer with your own photo stickers.
+// 'favs' (your ⭐ favourites) and 'ours' (your photo stickers) are filled in by
+// the sticker drawer (sticker-ui.js).
 export const CATEGORIES = [
+  { id: 'favs', label: 'Favourites', icon: '⭐', items: [] },
   { id: 'ours', label: 'Ours', icon: '✨', items: [] },
   { id: 'cute', label: 'Cute', icon: '🐰', items: ['heart', 'star', 'sparkles', 'cloud', 'bunny', 'bear', 'cat', 'bee', 'butterfly', 'mochi'].map(k => 'svg:' + k) },
   { id: 'nature', label: 'Nature', icon: '🌷', items: ['sun', 'moon', 'rainbow', 'daisy', 'tulip', 'blossom', 'clover', 'sprout', 'mushroom', 'drop'].map(k => 'svg:' + k) },
@@ -414,6 +465,7 @@ export const CATEGORIES = [
   { id: 'chores', label: 'Chores', icon: '🧺', items: ['broom', 'laundry', 'washer', 'spray', 'sponge', 'wateringcan', 'iron', 'groceries', 'bucket'].map(k => 'svg:' + k) },
   { id: 'sports', label: 'Sports', icon: '⚽', items: ['soccer', 'basketball', 'tennis', 'dumbbell', 'sneaker', 'bicycle', 'yogamat', 'trophy', 'medal'].map(k => 'svg:' + k) },
   { id: 'hobbies', label: 'Hobbies', icon: '🎨', items: ['palette', 'guitar', 'camera', 'books', 'yarn', 'gamepad', 'headphones', 'puzzle', 'clapper'].map(k => 'svg:' + k) },
+  { id: 'work', label: 'Work', icon: '💼', items: ['laptop', 'briefcase', 'mug', 'calendar', 'clipboard', 'sticky', 'pencil', 'chart', 'alarm', 'folder', 'check', 'clip'].map(k => 'svg:' + k) },
   { id: 'washi', label: 'Washi', icon: '🎀', items: Object.keys(WASHI).map(k => 'washi:' + k) },
   { id: 'words', label: 'Words', icon: '💬', items: ['custom', ...WORDS.map(([c, t]) => `word:${c}:${t}`)] },
   { id: 'emoji', label: 'Emoji', icon: '😊', items: EMOJI.map(e => 'emoji:' + e) },

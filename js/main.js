@@ -17,7 +17,8 @@ import { startIphone } from './iphone.js';
 import { avatarHTML } from './avatars.js';
 import { initCustom } from './custom.js';
 import { setBionic } from './bionic.js';
-import { cleanUpOldTrackers, tidyMyDocs } from './docs.js';
+import { addDatesTracker, cleanUpOldTrackers, tidyMyDocs } from './docs.js';
+import { copyDatePhotos, planReminder } from './dates.js';
 import { startNudges } from './nudges.js';
 
 const views = {};
@@ -93,6 +94,7 @@ function startApp() {
   // One-time clean-ups, once this phone has everything (see docs.js).
   const synced = store.startSync();
   synced.then(ok => { if (ok && cleanUpOldTrackers() && current) views[current].show(); });
+  synced.then(ok => { if (ok && addDatesTracker() && current) views[current].show(); planReminder(); });
   if (!new URLSearchParams(location.search).has('widgets')) startNudges(synced);
   setBionic(!!prefs.bionic, prefs.bionicLevel);
   startNative();
@@ -107,6 +109,7 @@ function startApp() {
       busy: () => !!document.querySelector('.sheet-wrap'),
       myName: () => store.readMine('profile', {}).name,
       after: () => { updateNativeSession(); route(); },
+      photos: copyDatePhotos,
       cls: { input: 'inp', code: 'code-pill big', actions: 'sheet-actions', primary: 'btn', ghost: 'btn ghost', err: 'ob-err' },
     });
   }

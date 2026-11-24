@@ -5,12 +5,12 @@
 // Caches are named "doing-…" so they never touch Human Being's ("tend-…")
 // if both apps are served from the same site.
 
-const CACHE = 'doing-v24';
+const CACHE = 'doing-v25';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css', './css/doing.css',
   './js/main.js', './js/config.js', './js/util.js', './js/ui.js', './js/store.js', './js/docs.js',
   './js/stickers.js', './js/sticker-ui.js', './js/track.js', './js/cycle.js', './js/own.js', './js/picker.js', './js/month.js', './js/work.js', './js/workyear.js', './js/cyclepage.js', './js/todo.js', './js/plan.js', './js/actions.js', './js/widgets.js', './js/widget-preview.js', './js/iphone.js', './scriptable/human-doing.js', './js/walk.js', './js/moodsleep.js', './js/buttons.js', './js/cyclelog.js',
-  './js/us.js', './js/onboarding.js', './js/native.js', './js/avatars.js', './js/moods.js', './js/custom.js', './js/gifts.js', './js/bionic.js', './js/icons.js', './js/richtext.js', './js/feedback.js', './js/about.js', './js/nudges.js', './js/remind.js',
+  './js/us.js', './js/onboarding.js', './js/native.js', './js/avatars.js', './js/moods.js', './js/custom.js', './js/gifts.js', './js/bionic.js', './js/icons.js', './js/richtext.js', './js/feedback.js', './js/about.js', './js/nudges.js', './js/remind.js', './js/spacemove.js', './js/dates.js',
   './icons/icon.svg', './icons/hb-icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png',
 ];
 

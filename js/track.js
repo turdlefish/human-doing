@@ -25,6 +25,7 @@ import { createMonth } from './month.js';
 import { createWorkYear } from './workyear.js';
 import { createCyclePage } from './cyclepage.js';
 import { createMoodSleep } from './moodsleep.js';
+import { createDatesPage, datesCardHTML, onDatesAction } from './dates.js';
 import { leaveFor } from './work.js';
 import * as act from './actions.js';
 
@@ -62,6 +63,7 @@ const LOOK = {
   caffeine: { color: 'peach', icon: () => stk('latte'), title: 'Caffeine' },
   meds: { color: 'mint', icon: () => emo('💊'), title: 'Medication' },
   walk: { color: 'mint', icon: () => stk('sneaker'), title: 'Walk' },
+  dates: { color: 'pink', icon: () => stk('heart'), title: 'Date nights' },
 };
 
 // Example data for a tracker's preview: { entry, settings?, extra? } (extra:
@@ -123,6 +125,7 @@ export function createTrack(root) {
       <div id="k-year" hidden></div>
       <div id="k-cycle" hidden></div>
       <div id="k-hb" hidden></div>
+      <div id="k-dates" hidden></div>
     </div>`;
   const strip = $('#k-strip', root);
   const todayBtn = $('.today-btn', root);
@@ -131,7 +134,8 @@ export function createTrack(root) {
   const yearEl = $('#k-year', root);
   const cycleEl = $('#k-cycle', root);
   const hbEl = $('#k-hb', root);
-  const isPage = () => mode === 'year' || mode === 'cycle' || mode === 'hb';
+  const datesEl = $('#k-dates', root);
+  const isPage = () => mode === 'year' || mode === 'cycle' || mode === 'hb' || mode === 'dates';
   const iconFor = d => (LOOK[d.id] ? LOOK[d.id].icon() : ownIcon(d));
 
   // The month view; tapping a date there opens that day here.
@@ -159,6 +163,7 @@ export function createTrack(root) {
   });
   const cycleView = createCyclePage(cycleEl, { day: () => day, onBack: () => closePage() });
   const hbView = createMoodSleep(hbEl, { onBack: () => closePage() });
+  const datesView = createDatesPage(datesEl, { onBack: () => closePage() });
   function openPage(name) {
     if (!isPage()) backTo = mode;
     monthView.leave();
@@ -597,12 +602,23 @@ export function createTrack(root) {
     `${t.n} / ${w.goal}`);
   }
 
-  const RENDER = { work: workCard, water: c => drinkCard('water', c), caffeine: c => drinkCard('caffeine', c), meds: medsCard, cycle: cycleCard, walk: walkCard };
+  // Date nights (dates.js): always full size, no ✓ Done (it isn't a day's log),
+  // and always shared (it's for the two of you; surprises stay secret).
+  function datesCard(ctx) {
+    const look = lookOf('dates', ctx);
+    return `<article class="card tk tk-dates" data-tracker="dates" style="${colorVars(look.color)}">
+      <div class="card-tape"></div>
+      <div class="tk-head">${look.icon()}<h3>${look.title}</h3></div>
+      ${datesCardHTML(ctx)}
+    </article>`;
+  }
+
+  const RENDER = { work: workCard, water: c => drinkCard('water', c), caffeine: c => drinkCard('caffeine', c), meds: medsCard, cycle: cycleCard, walk: walkCard, dates: datesCard };
 
   function cardFor(id, ctx) {
     if (!RENDER[id] && !(ctx.def && ctx.def.type)) return '';
     // The work day and the cycle stay full size when done (a summary); the rest fold to a line.
-    if (id !== 'work' && id !== 'cycle' && isDone(id, ctx)) return foldedCard(id, ctx);
+    if (id !== 'work' && id !== 'cycle' && id !== 'dates' && isDone(id, ctx)) return foldedCard(id, ctx);
     return RENDER[id] ? RENDER[id](ctx) : ownCard(id, ctx);
   }
 
@@ -657,10 +673,12 @@ export function createTrack(root) {
     yearEl.hidden = mode !== 'year';
     cycleEl.hidden = mode !== 'cycle';
     hbEl.hidden = mode !== 'hb';
+    datesEl.hidden = mode !== 'dates';
     if (mode === 'month') { monthView.render(); return; }
     if (mode === 'hb') { hbView.render(); return; }
     if (mode === 'year') { yearView.render(); return; }
     if (mode === 'cycle') { cycleView.render(); return; }
+    if (mode === 'dates') { datesView.render(); return; }
     if (who === 'them' && them()) { body.innerHTML = renderThem(); return; }
     const s = readSettings();
     const entry = readDay(me(), day);
@@ -760,6 +778,8 @@ export function createTrack(root) {
 
   // ── taps ───────────────────────────────────────────────────────────────
   root.addEventListener('click', e => {
+    const dt = e.target.closest('[data-dt]');
+    if (dt && !datesEl.contains(dt)) { onDatesAction(dt, { refresh: rerender, openPage: () => openPage('dates') }); return; }
     const dayBtn = e.target.closest('[data-day]');
     if (dayBtn && strip.contains(dayBtn)) {
       if (Date.now() - dragEndedAt < 250) return;
@@ -864,7 +884,7 @@ export function createTrack(root) {
     if (source !== 'remote' || !root.classList.contains('active')) return;
     if (k.endsWith(':profile')) renderHead();
     const typing = document.activeElement && body.contains(document.activeElement) && document.activeElement.tagName === 'TEXTAREA';
-    if ((/^p:\w:(help|shared(-[\d-]+)?|settings|trackers-[\d-]+|month-stickers)$/.test(k) || /^hb:p:\w:checkins/.test(k)) && !typing) rerender();
+    if ((/^p:\w:(help|shared(-[\d-]+)?|settings|trackers-[\d-]+|month-stickers|dates|dates-secret)$/.test(k) || /^hb:p:\w:checkins/.test(k)) && !typing && mode === 'day') rerender();
   });
 
   return {
@@ -877,7 +897,7 @@ export function createTrack(root) {
     },
     /** From a widget: 'cycle' or 'year' (those pages), 'them' (your person's day) or 'today'. */
     open(route) {
-      if (route === 'cycle' || route === 'year') { openPage(route); return; }
+      if (route === 'cycle' || route === 'year' || route === 'dates') { openPage(route); return; }
       if (isPage()) closePage('day');
       if (mode !== 'day') { monthView.leave(); mode = 'day'; }
       who = route === 'them' && them() ? 'them' : 'me';
