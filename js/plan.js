@@ -7,9 +7,10 @@
 // touch, so scrolling past a block never changes its time). Undo follows. Stickers sit on a
 // layer above the page (one sticker page per month for monthly schedules).
 //
-// An event shows its name and its little icon, or just one of them (the
-// plan's ⚙ "Events show"), never its times: tap it for those. Its icon is an
-// emoji (b.icon) or a sticker stuck on it (b.stk, a sticker key: stickers.js).
+// An event never shows its times (tap it for those). It can have an emoji
+// (b.icon) and a sticker (b.stk, a sticker key: stickers.js), and shows its
+// name, its emoji or its sticker, or the name with one of them: the plan's ⚙
+// "Events show" (s.show), or the event's own choice (b.show). See looksOf.
 
 import * as store from './store.js';
 import { COLOR_KEYS, $, clamp, clone, colorVars, dayKey, esc, fmtDay, fmtTime, nowMinutes, prefs, setPref, shiftDay, toast, uid, vibrate } from './util.js';
@@ -326,27 +327,43 @@ export function createPlan(root) {
     const narrow = G.colW < MIN_COL;
     const lineH = narrow ? (tiny ? 10 : 11) : 15;
     const padY = tiny ? 0 : narrow ? 4 : 9;
-    const show = showOf(cur());
-    const hasIcon = show !== 'name' && !!(b.icon || b.stk);
+    const lk = looksOf(b);
+    const hasIcon = lk.emoji || lk.sticker;
     let lines = Math.max(1, Math.floor((box.h - padY) / lineH));
     const cls = hasIcon && box.width < 30 ? ' thin' : narrow && lines < 3 ? ' bare' : '';
     // A sticker sits above the name (when there's room for it at all).
-    if (b.stk && hasIcon && !cls) lines = Math.max(1, Math.floor((box.h - padY - (narrow ? 20 : 26)) / lineH));
+    if (lk.sticker && lk.name && !cls) lines = Math.max(1, Math.floor((box.h - padY - (narrow ? 20 : 26)) / lineH));
     return { style: `--lines:${lines};`, cls };
   }
-  // What events show (the plan's ⚙): 'both' (name and icon), 'name' or 'icon'.
-  const showOf = s => (s && (s.show === 'name' || s.show === 'icon') ? s.show : 'both');
-  // An event's look on the page: its icon (emoji, or a sticker stuck on it) and name.
+  // What an event can show: the plan's ⚙ "Events show" (s.show), or the
+  // event's own (b.show, '' for the plan's). Plans from before 1.14 ('both',
+  // or none) show the name and icon.
+  const SHOWS = [['name-icon', 'Name & icon'], ['name-sticker', 'Name & sticker'], ['name', 'Name'], ['icon', 'Icon'], ['sticker', 'Sticker']];
+  const isShow = v => SHOWS.some(([k]) => k === v);
+  const showOf = s => (s && isShow(s.show) ? s.show : 'name-icon');
+  /**
+   * What one event shows: { name, emoji, sticker }. When it hasn't got what's
+   * chosen, it shows what it has instead (its emoji for a sticker, or the other
+   * way round), and its name when it has neither, so no event is ever blank.
+   */
+  function looksOf(b) {
+    const mode = isShow(b.show) ? b.show : showOf(cur());
+    const want = mode === 'name' ? '' : mode.endsWith('sticker') ? 'sticker' : 'emoji';
+    const hasE = !!b.icon, hasS = !!b.stk;
+    const sticker = want === 'sticker' ? hasS : want === 'emoji' ? !hasE && hasS : false;
+    const emoji = want === 'emoji' ? hasE : want === 'sticker' ? !hasS && hasE : false;
+    return { name: mode.startsWith('name') || (!emoji && !sticker), emoji, sticker };
+  }
+  // An event's look on the page, as classes: a sticker stuck on it, or no name.
   function blockLook(b) {
-    const show = showOf(cur());
-    const icon = show !== 'name' && !!(b.icon || b.stk);
-    return (icon && b.stk ? ' has-stk' : '') + (icon && show === 'icon' ? ' show-icon' : '');
+    const lk = looksOf(b);
+    return (lk.sticker ? ' has-stk' : '') + (!lk.name ? ' show-icon' : '');
   }
 
   function blockInner(b) {
-    const show = showOf(cur());
-    const emoji = show !== 'name' && !b.stk && b.icon ? `<span class="blk-icon">${esc(b.icon)}</span>` : '';
-    const sticker = show !== 'name' && b.stk ? `<span class="blk-stk" aria-hidden="true">${stickerInner(b.stk)}</span>` : '';
+    const lk = looksOf(b);
+    const emoji = lk.emoji ? `<span class="blk-icon">${esc(b.icon)}</span>` : '';
+    const sticker = lk.sticker ? `<span class="blk-stk" aria-hidden="true">${stickerInner(b.stk)}</span>` : '';
     // The times only show while you're moving or stretching it (tap it for them).
     return `${sticker}<div class="blk-title">${emoji}<span class="blk-name">${esc(b.title) || 'Untitled'}</span></div>
       <div class="blk-time">${fmtTime(b.start)} – ${fmtTime(b.end)}</div>
@@ -644,21 +661,24 @@ export function createPlan(root) {
       ? items.map(k => `<button type="button" class="stk-pick${k === selected ? ' on' : ''}" data-stk="${esc(k)}" aria-label="Sticker"><span class="stk-pick-in">${stickerInner(k)}</span></button>`).join('')
       : `<p class="muted small stk-none">${tab === 'favs' ? 'No favourites yet: hold a sticker in the sticker drawer to ⭐ it.' : 'No stickers here yet.'}</p>`;
   };
-  // The current icon, small (the folded editor shows it).
-  const iconNow = b => (b.stk ? `<span class="if-stk">${stickerInner(b.stk)}</span>` : b.icon ? esc(b.icon) : '<span class="muted">none</span>');
+  // The current emoji and sticker, small (the folded editor shows them).
+  const iconNow = b => `${b.icon ? `<span class="if-cur">${esc(b.icon)}</span>` : ''}${b.stk ? `<span class="if-cur"><span class="if-stk">${stickerInner(b.stk)}</span></span>` : ''}${!b.icon && !b.stk ? '<span class="if-cur"><span class="muted">none</span></span>' : ''}`;
+  const eventShowRow = b => `<div class="show-pick" data-evshow>${[['', 'As the plan'], ...SHOWS].map(([v, l]) => `<button type="button" data-v="${v}" class="${(isShow(b.show) ? b.show : '') === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   function iconField(b) {
     if (!stkTab) stkTab = stickerFavs().length ? 'favs' : 'work';
     const tabs = STK_TABS.filter(t => t !== 'ours' || stkItems('ours').length);
     return `<details class="field icon-fold">
-      <summary><span>Little icon</span><span class="if-cur">${iconNow(b)}</span><span class="if-change">Change</span></summary>
+      <summary><span>Icon & sticker</span><span class="if-now">${iconNow(b)}</span><span class="if-change">Change</span></summary>
       <div class="if-body">
-        <span class="if-label">An emoji</span>${iconRow(b.stk ? '·' : b.icon)}
-        <span class="if-label">Or a sticker, stuck on the event</span>
+        <span class="if-label">Emoji</span>${iconRow(b.icon)}
+        <span class="if-label">Sticker <button type="button" class="link-btn if-nostk" data-nostk${b.stk ? '' : ' hidden'}>✕ No sticker</button></span>
         <div class="if-tabs">${tabs.map(t => {
           const c = t === 'favs' ? { icon: '⭐', label: 'Favourites' } : CATEGORIES.find(x => x.id === t) || { icon: '', label: t };
           return `<button type="button" class="if-tab${t === stkTab ? ' on' : ''}" data-stk-tab="${t}">${c.icon} ${esc(c.label)}</button>`;
         }).join('')}</div>
         <div class="if-grid">${stkGrid(stkTab, b.stk)}</div>
+        <span class="if-label">This event shows <small class="field-hint">· the plan's choice is in its ⚙</small></span>
+        ${eventShowRow(b)}
       </div>
     </details>`;
   }
@@ -674,7 +694,7 @@ export function createPlan(root) {
     const sheet = openSheet({
       title: b.title || 'Untitled',
       className: 'block-info',
-      body: `<div class="bi-head" style="${colorVars(b.color)}">${b.stk ? `<span class="bi-stk">${stickerInner(b.stk)}</span>` : b.icon ? `<span class="bi-icon">${esc(b.icon)}</span>` : ''}<span class="bi-when">${when}</span></div>
+      body: `<div class="bi-head" style="${colorVars(b.color)}">${b.icon ? `<span class="bi-icon">${esc(b.icon)}</span>` : ''}${b.stk ? `<span class="bi-stk">${stickerInner(b.stk)}</span>` : ''}<span class="bi-when">${when}</span></div>
         ${b.note ? `<div class="bi-note rich">${richHTML(b.note)}</div>` : ''}
         <div class="sheet-actions"><button type="button" class="btn" data-a="ok">Lovely</button></div>`,
     });
@@ -693,7 +713,7 @@ export function createPlan(root) {
     const syncCopies = () => {
       for (const [day, cid] of copies) {
         const c = findBlock(cid);
-        if (c) Object.assign(c, { title: b.title, icon: b.icon, stk: b.stk || '', start: b.start, end: b.end, color: b.color, note: b.note, day });
+        if (c) Object.assign(c, { title: b.title, icon: b.icon, stk: b.stk || '', show: b.show || '', start: b.start, end: b.end, color: b.color, note: b.note, day });
       }
     };
     let dupId = null, rich = null;
@@ -753,10 +773,23 @@ export function createPlan(root) {
       const ic = e.target.closest('.icon-fold [data-icon]');
       if (ic) {
         b.icon = ic.dataset.icon;
-        b.stk = '';
         el.querySelectorAll('.icon-fold .icon-pick').forEach(x => x.classList.toggle('on', x === ic));
+        el.querySelector('.if-now').innerHTML = iconNow(b);
+        update();
+        return;
+      }
+      if (e.target.closest('[data-nostk]')) {
+        b.stk = '';
         el.querySelectorAll('.stk-pick').forEach(x => x.classList.remove('on'));
-        el.querySelector('.if-cur').innerHTML = iconNow(b);
+        el.querySelector('[data-nostk]').hidden = true;
+        el.querySelector('.if-now').innerHTML = iconNow(b);
+        update();
+        return;
+      }
+      const evShow = e.target.closest('[data-evshow] button');
+      if (evShow) {
+        b.show = evShow.dataset.v;
+        el.querySelectorAll('[data-evshow] button').forEach(x => x.classList.toggle('on', x === evShow));
         update();
         return;
       }
@@ -771,8 +804,8 @@ export function createPlan(root) {
       if (sp) {
         b.stk = sp.dataset.stk;
         el.querySelectorAll('.stk-pick').forEach(x => x.classList.toggle('on', x === sp));
-        el.querySelectorAll('.icon-fold .icon-pick').forEach(x => x.classList.remove('on'));
-        el.querySelector('.if-cur').innerHTML = iconNow(b);
+        el.querySelector('[data-nostk]').hidden = false;
+        el.querySelector('.if-now').innerHTML = iconNow(b);
         update();
         return;
       }
@@ -1075,8 +1108,8 @@ export function createPlan(root) {
           <div class="field"><span>Week starts on</span>
             <div class="seg wide" data-group="weekStart">${[1, 0].map(d => `<button type="button" data-v="${d}" class="${(s.weekStart ?? 1) === d ? 'on' : ''}">${esc(dowName(d, 'long'))}</button>`).join('')}</div></div>` : ''}
         ${t !== 'month' ? `
-          <div class="field"><span>Events show <small class="field-hint">· tap one for its times and notes</small></span>
-            <div class="seg wide" data-group="show">${[['both', 'Name & icon'], ['name', 'Just the name'], ['icon', 'Just the icon']].map(([v, l]) => `<button type="button" data-v="${v}" class="${showOf(s) === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>` : ''}
+          <div class="field"><span>Events show <small class="field-hint">· each event can choose its own too; tap one for its times and notes</small></span>
+            <div class="show-pick" data-group="show">${SHOWS.map(([v, l]) => `<button type="button" data-v="${v}" class="${showOf(s) === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>` : ''}
         <div class="field"><span>Order of your schedules</span><div class="sched-order"></div></div>
         <div class="sheet-actions">
           <button type="button" class="btn ghost danger-text" data-a="delete">Delete</button>

@@ -1122,7 +1122,13 @@ details.more p { margin-top: 8px; line-height: 1.5; }
 .icon-fold > summary { display: flex; align-items: center; gap: 10px; cursor: pointer; list-style: none; padding: 4px 0; }
 .icon-fold > summary::-webkit-details-marker { display: none; }
 .icon-fold > summary > span:first-child { flex: 1; }
+.if-now { display: inline-flex; gap: 6px; }
 .if-cur { display: inline-grid; place-items: center; min-width: 34px; height: 34px; font-size: 22px; border-radius: 12px; background: var(--surface-2); }
+.if-label .if-nostk { margin: 0 0 0 8px; padding: 0; font-size: 12px; }
+/* What events show (the plan's ⚙, and each event's own): a little grid of choices. */
+.show-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.show-pick button { border: 0; border-radius: 999px; padding: 8px 6px; background: var(--surface-2); color: var(--ink-soft); font: 700 12.5px var(--font-ui); }
+.show-pick button.on { background: var(--c-mid, var(--pink-mid)); color: #5B4B5E; box-shadow: var(--shadow-sm); }
 .if-stk { display: block; width: 28px; height: 28px; }
 .if-change { font: 800 12.5px var(--font-ui); color: var(--ink-soft); }
 .if-change::after { content: ' ▾'; }

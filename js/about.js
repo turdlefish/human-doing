@@ -3,12 +3,15 @@
 
 export const APP = 'Human Doing';
 export const NS = 'doing';   // local storage prefix
-export const VERSION = '1.13';
+export const VERSION = '1.14';
 export const WEBSITE = 'https://turdlefish.github.io/human-doing/';
 // What's new, by version, newest first. A phone that skipped versions sees
 // them all, 🔔 Tell sends your person everything after their version, and Us
 // lists every one. (1.4 covers 1.4 to 1.4.4, and 1.3 covers 1.3.1.)
 export const WHATS_NEW = {
+  '1.14': [
+    '🏷️ An event can have an emoji and a sticker. Show its name, its emoji, its sticker, or the name with either one: for the whole plan (⚙) or event by event',
+  ],
   '1.13': [
     '💞 Date nights, on Tracking: how long since each of you planned one, a timeline with photos and a few words, a reminder, and surprises your person can\'t peek at',
     '🗓️ Plan: events show just their name and icon, no times (tap one for those). Pick name, icon or both in the plan\'s ⚙',
