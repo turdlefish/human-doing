@@ -300,13 +300,30 @@ export function createPlan(root) {
     layer.render();
   }
 
+  // A week packs its events close together (a pixel or two apart), so their words get the room.
+  const gapBelow = () => (G.cols > 1 ? 2 : 3);
   function blockBox(b, col, L) {
     const s = cur();
+    const week = G.cols > 1;
     const top = yOf(Math.max(b.start, s.start));
-    const h = Math.max(18, (Math.min(b.end, s.end) - Math.max(b.start, s.start)) * ppm() - 3);
-    const pad = G.cols > 1 ? (G.colW < MIN_COL ? 1 : 3) : 0;   // slim columns: blocks nearly as wide as their day
-    const inner = G.colW - pad * 2 - 4;
-    return { top, h, left: GUTTER + col * G.colW + pad + inner * L.col / L.cols, width: inner / L.cols - (L.cols > 1 ? 3 : 0) };
+    const h = Math.max(18, (Math.min(b.end, s.end) - Math.max(b.start, s.start)) * ppm() - gapBelow());
+    const pad = week ? 1 : 0;
+    const inner = G.colW - pad * 2 - (week ? 0 : 4);
+    return { top, h, left: GUTTER + col * G.colW + pad + inner * L.col / L.cols, width: inner / L.cols - (L.cols > 1 ? (week ? 1 : 3) : 0) };
+  }
+  // A week centres each event's words over as many whole lines as fit its height
+  // (--lines; app.css has the matching line heights and paddings). In slim day
+  // columns the icon only shows when there's room for a few lines, so short
+  // events show their words, not just an icon; events squeezed side by side
+  // too thin for any word show just their icon.
+  function weekFit(b, box, tiny) {
+    const narrow = G.colW < MIN_COL;
+    const lineH = narrow ? (tiny ? 10 : 11) : 15;
+    const padY = tiny ? 0 : narrow ? 4 : 9;
+    const timeH = narrow || tiny ? 0 : 13;
+    const lines = Math.max(1, Math.floor((box.h - padY - timeH) / lineH));
+    const cls = b.icon && box.width < 30 ? ' thin' : narrow && lines < 3 ? ' bare' : '';
+    return { style: `--lines:${lines};`, cls };
   }
 
   function blockInner(b) {
@@ -330,7 +347,8 @@ export function createPlan(root) {
       for (const b of bs) {
         const box = blockBox(b, col, lay.get(b.id));
         const tiny = (b.end - b.start) * ppm() < 40;
-        html += `<div class="blk${tiny ? ' tiny' : ''}" data-id="${b.id}" style="top:${box.top}px;height:${box.h}px;left:${box.left}px;width:${box.width}px;${colorVars(b.color)}">${blockInner(b)}</div>`;
+        const fit = G.cols > 1 ? weekFit(b, box, tiny) : { style: '', cls: '' };
+        html += `<div class="blk${tiny ? ' tiny' : ''}${fit.cls}" data-id="${b.id}" style="top:${box.top}px;height:${box.h}px;left:${box.left}px;width:${box.width}px;${fit.style}${colorVars(b.color)}">${blockInner(b)}</div>`;
       }
     }
     blocksEl.innerHTML = html;
@@ -514,8 +532,8 @@ export function createPlan(root) {
         const col = clamp(Math.floor((drag.lastX - r.left - GUTTER) / G.colW), 0, 6);
         b.day = weekOrder(s)[col];
         if (drag.el) {
-          drag.el.style.left = (GUTTER + col * G.colW + 3) + 'px';
-          drag.el.style.width = (G.colW - 10) + 'px';
+          drag.el.style.left = (GUTTER + col * G.colW + 1) + 'px';
+          drag.el.style.width = (G.colW - 2) + 'px';
         }
       }
     } else {
@@ -523,7 +541,7 @@ export function createPlan(root) {
     }
     if (drag.el) {
       drag.el.style.top = yOf(b.start) + 'px';
-      drag.el.style.height = Math.max(18, (b.end - b.start) * ppm() - 3) + 'px';
+      drag.el.style.height = Math.max(18, (b.end - b.start) * ppm() - gapBelow()) + 'px';
       const t = drag.el.querySelector('.blk-time');
       if (t) t.textContent = `${fmtTime(b.start)} – ${fmtTime(b.end)}`;
     }

@@ -512,24 +512,38 @@ select.inp { appearance: none; -webkit-appearance: none; background-image: linea
 .wh-corner { position: sticky; left: 0; flex: none; width: 58px; background: var(--frost); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 1; }
 .wh-day { flex: none; text-align: center; font: 600 13.5px var(--font-display); color: var(--ink-soft); }
 .wh-day.today span { background: var(--lav-mid); color: #62509A; padding: 3px 10px; border-radius: 999px; }
-.timeline.week .blk { padding: 5px 7px 7px 8px; border-left-width: 4px; border-radius: 12px; }
-.timeline.week .blk-title { font-size: 12.5px; }
-.timeline.week .blk-icon { font-size: 13px; }
-.timeline.week .blk-time { font-size: 10.5px; }
+/* A week: events sit close together, with their words centred and wrapped over as many
+   whole lines as fit (plan.js weekFit sets --lines from each event's height; keep --lh and
+   the paddings here in step with it). Long words break with a hyphen. */
+.timeline.week .blk {
+  --lh: 15px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  padding: 4px 5px 5px 6px; border-left-width: 4px; border-radius: 10px;
+}
+.timeline.week .blk.tiny { flex-direction: column; gap: 0; padding: 0 4px 0 5px; }
+.timeline.week .blk-title {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--lines, 2);
+  max-width: 100%; max-height: calc(var(--lines, 2) * var(--lh)); overflow: hidden;
+  white-space: normal; overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto;
+  font-size: 12.5px; line-height: var(--lh);
+}
+.timeline.week .blk.thin .blk-title > span:not(.blk-icon) { display: none; }
+.timeline.week .blk.thin .blk-icon { margin: 0; }
+.timeline.week .blk-icon { display: inline; font-size: 13px; margin-right: 3px; }
+.timeline.week .blk-time { font-size: 10.5px; line-height: 13px; margin: 0; }
 .timeline.week .blk-note { display: none; }
 .timeline.week .blk.tiny .blk-time { display: none; }
 /* The whole week at a glance: slim day columns with small words, shorter hours. */
 .zoom-btn { align-self: center; }
 .week-head.narrow .wh-day { font-size: 11px; }
 .week-head.narrow .wh-day.today span { padding: 2px 6px; }
-.timeline.narrow .blk { padding: 3px 1px 3px 3px; border-left-width: 2.5px; border-radius: 7px; }
-.timeline.narrow .blk-title { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; white-space: normal; overflow-wrap: anywhere; font: 700 10px/1.15 var(--font-ui); letter-spacing: -.2px; }
-.timeline.narrow .blk-title span:last-child { overflow: visible; text-overflow: clip; }
-.timeline.narrow .blk-icon { display: block; font-size: 10.5px; line-height: 1.2; }
-.timeline.narrow .blk.tiny .blk-icon { display: inline; }
+.timeline.narrow .blk { --lh: 11px; padding: 2px 1px 2px 1.5px; border-left-width: 2px; border-radius: 6px; }
+.timeline.narrow .blk.tiny { --lh: 10px; padding: 0 1px 0 1.5px; }
+.timeline.narrow .blk-title { font-family: var(--font-ui); font-weight: 700; font-size: 10px; letter-spacing: -.2px; }
+.timeline.narrow .blk-icon { font-size: 10px; margin-right: 1px; }
+.timeline.narrow .blk.bare .blk-icon { display: none; }
+.timeline.narrow .blk.bare .blk-title { font-size: 9.5px; letter-spacing: -.3px; }
 .timeline.narrow .blk-time, .timeline.narrow .blk-note { display: none; }
-.timeline.narrow .blk.tiny { padding: 1px 1px 1px 3px; }
-.timeline.narrow .blk.tiny .blk-title { -webkit-line-clamp: 1; }
 .timeline.narrow .blk-handle { width: 18px; margin-left: -9px; }
 .timeline.short .tl-label { font-size: 10px; }
 .tl-label.half { font-size: 9.5px; opacity: .8; }
