@@ -4,13 +4,16 @@
 //          phone that has just joined (someone new); later from the guide.
 //   guide  a sheet listing everything in the app, section by section, with
 //          "Go to …" and ▶ Take the tour.
+//   site   the website's address with Open ↗ and 📋 Copy link, in the guide,
+//          on the tour's website step ({ site: true }) and on Us (siteRow).
 // This file is the same in Human Being and Human Doing: guidetext.js has
 // each app's own words and the parts of its screens that the tour points at.
 
 import * as store from './store.js';
-import { colorVars, toast } from './util.js';
+import { colorVars, copyText, esc, toast } from './util.js';
 import { openSheet } from './ui.js';
-import { APP, NS } from './about.js';
+import { APP, NS, WEBSITE } from './about.js';
+import { isNative } from './native.js';
 import { GUIDE, TOUR } from './guidetext.js';
 
 const OFFERED = NS + ':tourOffered';   // this phone has had its one offer of the tour
@@ -28,6 +31,36 @@ export function initGuide(opts = {}) {
   prepare = opts.prepare || null;
   const btn = document.getElementById('help-btn');
   if (btn) btn.addEventListener('click', () => openGuide());
+  // 📋 Copy link, wherever it shows (the guide, the tour, Us).
+  document.addEventListener('click', async e => {
+    if (!e.target.closest('[data-site="copy"]')) return;
+    toast((await copyText(WEBSITE)) ? 'Website link copied' : `The website is ${siteName()}`);
+  });
+}
+
+// ── The website ───────────────────────────────────────────────────────────
+const siteName = () => WEBSITE.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const siteAddr = () => `<b class="site-addr">${esc(siteName())}</b>`;
+
+/** Open ↗ (in the app; on the website you're on it already) and 📋 Copy link. */
+function siteLinks() {
+  return `<span class="site-links">
+    ${isNative ? `<a class="btn small" href="${esc(WEBSITE)}" target="_blank" rel="noopener">🌐 Open the website ↗</a>` : ''}
+    <button type="button" class="btn ghost small" data-site="copy">📋 Copy link</button></span>`;
+}
+
+// What the website is: the same space as the app, synced both ways.
+const siteText = () => (isNative
+  ? `Use ${APP} in any browser too, on a computer or another phone, at ${siteAddr()}. Put in your space code (it's on Us) and it's the same space: whatever you change there shows up here in the app, and the other way round. It gets new versions by itself, with nothing to install.`
+  : `You're on the website: ${siteAddr()}. It's the same space as the Android app, so whatever you change here shows up in the app, and the other way round. Copy the link to open it on another computer or phone, with your space code (it's on Us).`);
+
+/** The website's row on Us (id u-site, which the tour points at). */
+export function siteRow() {
+  if (!WEBSITE) return '';
+  return `<div class="site-row" id="u-site">
+    <p>💻 ${isNative ? `<b>On the website too</b>: ${siteAddr()}. The same space, so it syncs with the app both ways.`
+      : `<b>The website</b>: ${siteAddr()}. The same space as the Android app, synced both ways.`}</p>
+    ${siteLinks()}</div>`;
 }
 
 /** A phone that has just joined: offers the tour, once (after that it's under ?). */
@@ -54,7 +87,7 @@ export function startTour(from = 0, offered = false) {
   el.innerHTML = `<div class="tour-shade"></div><div class="tour-hole" hidden></div>
     <div class="tour-tip" role="dialog" aria-modal="true" aria-labelledby="tour-h" tabindex="-1"></div>`;
   document.body.append(el);
-  const steps = TOUR.filter(s => { try { return !s.when || s.when(); } catch (e) { return false; } });
+  const steps = TOUR.filter(s => { try { return (!s.site || WEBSITE) && (!s.when || s.when()); } catch (e) { return false; } });
   tour = { el, tip: el.querySelector('.tour-tip'), hole: el.querySelector('.tour-hole'), steps, i: -1, target: null, key: '', raf: 0, offered, token: null, tab: null };
   el.addEventListener('click', onClick);
   document.addEventListener('keydown', onKey);
@@ -131,8 +164,9 @@ function renderTip(s, i) {
   t.tip.innerHTML = `
     <div class="tour-top">${first ? `<span class="tour-count">${APP}</span>` : `<span class="tour-count">${i} of ${n}</span>`}
       <button type="button" class="tour-x" data-t="close" aria-label="Close the tour">✕</button></div>
-    <h3 id="tour-h">${val(s.title)}</h3>
-    <p>${val(s.text)}</p>
+    <h3 id="tour-h">${val(s.title || (s.site ? 'On the website too 💻' : ''))}</h3>
+    <p>${val(s.text || (s.site ? siteText : ''))}</p>
+    ${s.site ? `<div class="tour-site">${siteLinks()}</div>` : ''}
     ${first ? '' : `<div class="tour-dots" aria-hidden="true">${Array.from({ length: n }, (_, k) => `<i${k + 1 === i ? ' class="on"' : ''}></i>`).join('')}</div>`}
     <div class="tour-acts">
       ${first ? `<button type="button" class="btn ghost small" data-t="close">${t.offered ? 'Maybe later' : 'Not now'}</button>`
@@ -187,6 +221,7 @@ export function openGuide() {
     body: `
       <p class="gd-intro">${val(GUIDE.intro)}</p>
       <button type="button" class="btn gd-tour" data-gd="tour">▶ Take the tour <small>about a minute</small></button>
+      ${WEBSITE ? `<div class="gd-site" style="${colorVars('sky')}"><h4>💻 On the website too</h4><p>${siteText()}</p>${siteLinks()}</div>` : ''}
       ${GUIDE.sections.map((s, i) => `
         <details class="gd-sec" style="${colorVars(s.color)}"${i === 0 ? ' open' : ''}>
           <summary><span class="gd-ico" aria-hidden="true">${s.icon}</span><span class="gd-name"><b>${s.title}</b><small>${val(s.sub)}</small></span></summary>

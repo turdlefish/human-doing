@@ -16,6 +16,7 @@ import { mountFeedback } from './feedback.js';
 import { openRemind } from './remind.js';
 import { openWhatsNew, tellWhatsNew, versionNote } from './nudges.js';
 import { APP, VERSION } from './about.js';
+import { siteRow } from './guide.js';
 import { isShortCode, startMove } from './spacemove.js';
 
 // The iPhone widget script, made ahead so "Copy" works straight after the tap.
@@ -211,6 +212,7 @@ export function createUs(root, { onTimeFormat, onTheme, onBionic } = {}) {
         <div class="card-tape"></div>
         <h3 class="card-title">Sync & backup</h3>
         <p class="muted small app-ver">📱 You're using <b>${APP} ${VERSION}</b>, ${isNative ? 'the Android app' : 'the website'}.</p>
+        ${siteRow()}
         <p class="sync-line" data-state="${status.state}"><span class="dot"></span><span id="u-status">${esc(STATUS_TEXT[status.state] || '')}</span></p>
         ${CONFIG.mock ? '<p class="muted small">Using the local test server (mock mode).</p>' : ''}
         <div class="btn-row">

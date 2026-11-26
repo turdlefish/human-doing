@@ -3,12 +3,15 @@
 
 export const APP = 'Human Doing';
 export const NS = 'doing';   // local storage prefix
-export const VERSION = '1.16';
+export const VERSION = '1.17';
 export const WEBSITE = 'https://turdlefish.github.io/human-doing/';
 // What's new, by version, newest first. A phone that skipped versions sees
 // them all, 🔔 Tell sends your person everything after their version, and Us
 // lists every one. (1.4 covers 1.4 to 1.4.4, and 1.3 covers 1.3.1.)
 export const WHATS_NEW = {
+  '1.17': [
+    '💻 Use Human Doing on the website too: tap ? at the top, or go to Us, to open it or copy its link. Put in your space code there and it syncs with the app both ways',
+  ],
   '1.16': [
     '❓ New here, or want a refresher? Tap ? at the top for a quick tour and a guide to everything in Human Doing',
   ],
