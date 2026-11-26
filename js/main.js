@@ -20,6 +20,7 @@ import { setBionic } from './bionic.js';
 import { addDatesTracker, cleanUpOldTrackers, tidyMyDocs } from './docs.js';
 import { copyDatePhotos, planReminder } from './dates.js';
 import { startNudges } from './nudges.js';
+import { closeTour, initGuide, offerTour } from './guide.js';
 
 const views = {};
 let current = null;
@@ -90,6 +91,8 @@ function startApp() {
   store.on(k => { if (k.endsWith(':profile')) renderTopbar(); });
   store.onStatus(renderSync);
   renderTopbar();
+  // ? in the top bar: the tour and the guide. The tour shows Tracking on today's day view.
+  initGuide({ prepare: tab => { if (tab === 'track' && views.track.open) views.track.open('today'); } });
   route();
   // One-time clean-ups, once this phone has everything (see docs.js).
   const synced = store.startSync();
@@ -112,6 +115,7 @@ function startApp() {
       photos: copyDatePhotos,
       cls: { input: 'inp', code: 'code-pill big', actions: 'sheet-actions', primary: 'btn', ghost: 'btn ghost', err: 'ob-err' },
     });
+    offerTour();   // someone new: a quick tour, offered once
   }
 }
 
@@ -134,6 +138,7 @@ window.tendPushWidget = () => { pushNow(); };
 
 // Android back button: close the top sheet / sticker drawer / edit first.
 window.tendBack = () => {
+  if (closeTour()) return true;
   const sheets = document.querySelectorAll('.sheet-wrap.open');
   if (sheets.length) { sheets[sheets.length - 1].querySelector('.sheet-x').click(); return true; }
   if (tray.target) { tray.close(); return true; }

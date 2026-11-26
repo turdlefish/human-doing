@@ -1,0 +1,59 @@
+/* The guide and the tour (js/guide.js). The same file in Human Being and Human Doing. */
+
+/* ? in the top bar */
+.help-btn {
+  flex: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--surface); box-shadow: var(--shadow-sm); color: var(--ink-soft);
+  font: 600 17px/1 var(--font-display); display: grid; place-items: center;
+}
+.help-btn:active { transform: scale(.94); }
+
+/* The tour: a soft shade with the part being shown lit up, and a tip card beside it. */
+.tour { position: fixed; inset: 0; z-index: 95; opacity: 0; transition: opacity .2s; --tour-shade: rgba(44, 26, 52, .52); }
+:root[data-theme="dark"] .tour { --tour-shade: rgba(3, 6, 22, .66); }
+.tour.open { opacity: 1; }
+.tour-shade { position: absolute; inset: 0; }
+.tour.no-hole .tour-shade { background: var(--tour-shade); }
+.tour-hole { position: absolute; border-radius: 16px; pointer-events: none; box-shadow: 0 0 0 200vmax var(--tour-shade); }
+.tour-hole::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 19px; border: 3px solid var(--pink);
+  animation: tour-glow 1.6s ease-in-out infinite;
+}
+@keyframes tour-glow { 50% { opacity: .4; } }
+.tour-tip {
+  position: absolute; left: 12px; top: 12px; width: min(340px, calc(100vw - 24px)); padding: 12px 16px 14px;
+  border-radius: 22px; background: var(--solid); color: var(--ink); box-shadow: 0 10px 34px rgba(40, 20, 50, .3); outline: none;
+  transition: opacity .15s;
+}
+.tour.moving .tour-tip { opacity: 0; }
+.tour-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 -8px 2px 0; }
+.tour-count { font: 700 11.5px var(--font-ui); color: var(--ink-faint); text-transform: uppercase; letter-spacing: .5px; }
+.tour-x { flex: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink-soft); font-size: 15px; }
+.tour-tip h3 { margin: 0 0 6px; font: 600 19px/1.2 var(--font-display); color: var(--ink); }
+.tour-tip p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); }
+.tour-tip b { font-weight: 800; }
+.tour-dots { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 12px; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--line); }
+.tour-dots i.on { width: 16px; background: var(--pink); }
+.tour-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.tour-acts .btn { margin: 0; }
+
+/* The guide: one folding section per part of the app. */
+.gd-intro { margin: 0 2px 12px; color: var(--ink-soft); font-weight: 600; }
+.gd-tour { width: 100%; margin: 0 0 14px; }
+.gd-tour small { margin-left: 4px; font: 700 12px var(--font-ui); opacity: .75; }
+.gd-sec { margin: 0 0 10px; border-radius: 18px; background: var(--c-bg); overflow: hidden; }
+.gd-sec summary { display: flex; align-items: center; gap: 12px; padding: 11px 14px; list-style: none; cursor: pointer; }
+.gd-sec summary::-webkit-details-marker { display: none; }
+.gd-sec summary::after { content: '›'; margin-left: auto; font: 600 22px/1 var(--font-display); color: var(--c-ink); transition: transform .2s; }
+.gd-sec[open] summary::after { transform: rotate(90deg); }
+.gd-ico { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface); font-size: 22px; }
+.gd-name { display: flex; flex-direction: column; min-width: 0; }
+.gd-name b { font: 600 16.5px var(--font-display); color: var(--c-ink); }
+.gd-name small { font: 700 12px var(--font-ui); color: var(--ink-soft); }
+.gd-list { margin: 0; padding: 0 16px 6px; list-style: none; }
+.gd-list li { padding: 9px 0; border-top: 1.5px dashed var(--line); font-size: 14px; line-height: 1.45; color: var(--ink); }
+.gd-list li:first-child { border-top: 0; padding-top: 2px; }
+.gd-list b { font-weight: 800; }
+.gd-go { margin: 0 14px 14px; }
+.gd-foot { margin: 14px 0 4px; text-align: center; }
